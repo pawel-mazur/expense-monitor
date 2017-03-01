@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {{ form(form) }}
+
+    {{ 'operation.header.count' | trans }}: {{ operations|length }}
+
+    <table>
+    {% for operation in operations %}
+        <tr>
+            <td>{{ operation.id }}</td>
+            <td>{{ operation.date | date('Y-m-d H:i') }}</td>
+            <td>{{ operation.name }}</td>
+            <td>{{ operation.amount }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% endblock %}

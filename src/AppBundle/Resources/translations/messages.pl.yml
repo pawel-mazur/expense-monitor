@@ -1,0 +1,13 @@
+flash:
+  form:
+    submitted: 'Formularz został przesłany!'
+
+form:
+  file:
+    label: 'Plik'
+  submit:
+    label: 'Prześlij'
+
+operation:
+  header:
+    count: 'Wszystkich operacji'
