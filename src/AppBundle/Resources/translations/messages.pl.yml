@@ -3,7 +3,8 @@ app:
 
 flash:
   form:
-    submitted: 'Formularz został przesłany!'
+    success: 'Pomyślnie zaimportowano operacje'
+    error: 'Podczas importowania operacji wystąpił błąd'
 
 form:
   file:

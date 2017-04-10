@@ -6,6 +6,8 @@ parameters:
 services:
     app.form.import_type:
         class: AppBundle\Form\ImportType
-        arguments: ['@session', '@doctrine.orm.entity_manager']
         tags:
             - { name: form.type, alias: AppBundle\Form\ImportType }
+    app.util.file_importer:
+        class: AppBundle\Utils\FileImporter
+        arguments: ['@doctrine.orm.entity_manager']
