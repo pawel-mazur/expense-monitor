@@ -1,0 +1,10 @@
+#!/bin/bash
+
+build_config
+
+chmod -R 0777 $OPENSHIFT_REPO_DIR/var
+
+ln -s $OPENSHIFT_DATA_DIR/parameters.yml $OPENSHIFT_REPO_DIR/app/config/parameters.yml
+ln -s $OPENSHIFT_DATA_DIR/vendor $OPENSHIFT_REPO_DIR/vendor
+
+cd $OPENSHIFT_REPO_DIR; composer install;
