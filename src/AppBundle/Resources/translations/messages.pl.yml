@@ -1,6 +1,10 @@
 app:
   title: 'Monitor wydatków'
 
+layout:
+  hello: 'Witaj, %username%!'
+  profile: 'Profil'
+
 flash:
   form:
     success: 'Pomyślnie zaimportowano operacje'
