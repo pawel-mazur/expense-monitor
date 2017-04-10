@@ -23,7 +23,7 @@ class DefaultController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
-            $this->addFlash('notice', $this->get('translator')->trans('flash.form.submitted'));
+            $this->addFlash('success', $this->get('translator')->trans('flash.form.submitted'));
             $em->flush();
         }
 

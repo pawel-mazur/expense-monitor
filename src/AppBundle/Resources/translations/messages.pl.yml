@@ -1,3 +1,6 @@
+app:
+  title: 'Monitor wydatków'
+
 flash:
   form:
     submitted: 'Formularz został przesłany!'
@@ -8,6 +11,12 @@ form:
   submit:
     label: 'Prześlij'
 
-operation:
-  header:
-    count: 'Wszystkich operacji'
+model:
+  operation:
+    _title: 'Operacja'
+    id: '#id'
+    date: 'Data'
+    name: 'Nazwa'
+    amount: 'Kwota'
+    header:
+      count: 'Wszystkich operacji'

@@ -1,20 +1,42 @@
 {% extends 'base.html.twig' %}
 
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
+
 {% block body %}
 
-    {{ form(form) }}
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {{ form(form, {attr: {'class':'form-inline'}}) }}
+        </div>
+    </div>
 
-    {{ 'operation.header.count' | trans }}: {{ operations|length }}
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>{{ 'model.operation.id' | trans }}</th>
+                        <th>{{ 'model.operation.date' | trans }}</th>
+                        <th>{{ 'model.operation.name' | trans }}</th>
+                        <th>{{ 'model.operation.amount' | trans }}</th>
+                    </tr>
+                    {% for operation in operations %}
+                    <tr>
+                        <td>{{ operation.id }}</td>
+                        <td>{{ operation.date | date('Y-m-d H:i') }}</td>
+                        <td>{{ operation.name }}</td>
+                        <td>{{ operation.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
 
-    <table>
-    {% for operation in operations %}
-        <tr>
-            <td>{{ operation.id }}</td>
-            <td>{{ operation.date | date('Y-m-d H:i') }}</td>
-            <td>{{ operation.name }}</td>
-            <td>{{ operation.amount }}</td>
-        </tr>
-    {% endfor %}
-    </table>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {{ 'model.operation.header.count' | trans }}: {{ operations|length }}
+        </div>
+    </div>
 
 {% endblock %}
