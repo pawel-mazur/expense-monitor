@@ -1,0 +1,20 @@
+{
+  "name": "spending-monitor",
+  "homepage": "https://github.com/pawel-mazur/spending-monitor",
+  "authors": [
+    "Paweł Mazur <pakumaz@gmail.com>"
+  ],
+  "description": "Monitor wydatków",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7"
+  }
+}
