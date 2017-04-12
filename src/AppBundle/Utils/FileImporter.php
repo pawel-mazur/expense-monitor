@@ -2,9 +2,13 @@
 
 namespace AppBundle\Utils;
 
+use AppBundle\Entity\Import;
 use AppBundle\Entity\Operation;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints\DateTime;
+use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class FileImporter
 {
@@ -14,18 +18,43 @@ class FileImporter
     private $entityManager;
 
     /**
+     * @var ValidatorInterface
+     */
+    protected $validator;
+
+    /**
+     * @var string
+     */
+    protected $importDir;
+
+    /**
+     * @var ArrayCollection|Operation[]
+     */
+    protected $operations;
+
+    /**
+     * @var ConstraintViolationList
+     */
+    protected $constraintViolationList;
+
+    /**
      * FileImporter constructor.
      *
-     * @param EntityManager $entityManager
+     * @param EntityManager      $entityManager
+     * @param ValidatorInterface $validator
+     * @param $importDir
      */
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, ValidatorInterface $validator, $importDir)
     {
         $this->entityManager = $entityManager;
+        $this->validator = $validator;
+        $this->importDir = $importDir;
+        $this->operations = new ArrayCollection();
     }
 
-    public function import(UploadedFile $uploadedFile)
+    public function load(Import $import)
     {
-        $handle = fopen($uploadedFile->getRealPath(), 'r');
+        $handle = fopen(sprintf('%s/%s', $this->importDir, $import->getFileName()), 'r');
 
         $first = true;
         while (false !== $data = fgetcsv($handle)) {
@@ -34,15 +63,37 @@ class FileImporter
                 continue;
             }
 
+            $errors = $this->validator->validate($data[1], new DateTime());
+
             $operation = new Operation();
+            $operation->setImport($import);
             $operation->setDate(new \DateTime($data[1]));
-            $operation->setName($data[6]);
+            $operation->setName(iconv('windows-1250', 'utf-8', $data[6]));
             $operation->setAmount($data[3]);
             $operation->setStatus(1);
 
-            $this->entityManager->persist($operation);
+            $errors = $this->validator->validate($operation);
+
+            $this->operations->add($operation);
         }
 
         fclose($handle);
+    }
+
+    public function import()
+    {
+        foreach ($this->getOperations() as $operation) {
+            $this->entityManager->persist($operation);
+        }
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @return Operation[]|ArrayCollection
+     */
+    public function getOperations()
+    {
+        return $this->operations;
     }
 }

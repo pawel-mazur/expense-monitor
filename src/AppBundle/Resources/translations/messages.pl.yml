@@ -15,6 +15,8 @@ form:
     label: 'Plik'
   submit:
     label: 'Prześlij'
+  import:
+    label: 'Importuj'
 
 model:
   operation:
@@ -24,4 +26,7 @@ model:
     name: 'Nazwa'
     amount: 'Kwota'
     header:
+      incomes: 'Przychody'
+      expenses: 'Wydatki'
+      balance: 'Bilans'
       count: 'Wszystkich operacji'

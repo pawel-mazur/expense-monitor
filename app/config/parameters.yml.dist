@@ -15,5 +15,8 @@ parameters:
     mailer_user:       ~
     mailer_password:   ~
 
+    upload_dir: '%kernel.root_dir%/../var/upload'
+    import_dir: '%kernel.root_dir%/../var/imports'
+
     # A secret key that's used to generate certain security-related tokens
     secret:            e5fe129bf5f7313d18f7010401917c6e921eecd3

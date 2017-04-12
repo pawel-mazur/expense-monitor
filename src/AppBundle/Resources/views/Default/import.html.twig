@@ -1,0 +1,29 @@
+{% extends '::base.html.twig' %}
+
+{% block body %}
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>{{ 'model.operation.date' | trans }}</th>
+                        <th>{{ 'model.operation.name' | trans }}</th>
+                        <th>{{ 'model.operation.amount' | trans }}</th>
+                    </tr>
+                    {% for operation in importer.operations %}
+                        <tr>
+                            <td>{{ operation.date | date('Y-m-d H:i') }}</td>
+                            <td>{{ operation.name }}</td>
+                            <td>{{ operation.amount | number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{ form(form) }}
+
+{% endblock %}
+

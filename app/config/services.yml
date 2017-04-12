@@ -6,8 +6,9 @@ parameters:
 services:
     app.form.import_type:
         class: AppBundle\Form\ImportType
+        arguments: ['@security.token_storage', '%import_dir%']
         tags:
             - { name: form.type, alias: AppBundle\Form\ImportType }
     app.util.file_importer:
         class: AppBundle\Utils\FileImporter
-        arguments: ['@doctrine.orm.entity_manager']
+        arguments: ['@doctrine.orm.entity_manager', '@validator', '%import_dir%']

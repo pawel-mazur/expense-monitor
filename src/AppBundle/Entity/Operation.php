@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\OperationRepository")
  * @ORM\Table(name="operations")
  */
 class Operation
@@ -19,6 +19,14 @@ class Operation
      * @var int
      */
     protected $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Import", inversedBy="operations")
+     * @ORM\JoinColumn(name="id_import", nullable=true)
+     *
+     * @var Import
+     */
+    protected $import;
 
     /**
      * @ORM\Column(name="date", type="datetime", nullable=false)
@@ -38,6 +46,8 @@ class Operation
 
     /**
      * @ORM\Column(name="amount", type="decimal", precision=10, scale=2, nullable=false)
+     *
+     * @Assert\Range(min="-1000000", max="1000000")
      *
      * @var float
      */
@@ -59,6 +69,22 @@ class Operation
     }
 
     /**
+     * @return Import
+     */
+    public function getImport()
+    {
+        return $this->import;
+    }
+
+    /**
+     * @param Import $import
+     */
+    public function setImport(Import $import)
+    {
+        $this->import = $import;
+    }
+
+    /**
      * @return \DateTime
      */
     public function getDate()
@@ -69,7 +95,7 @@ class Operation
     /**
      * @param \DateTime $date
      */
-    public function setDate($date)
+    public function setDate(\DateTime $date)
     {
         $this->date = $date;
     }

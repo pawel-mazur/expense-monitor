@@ -10,6 +10,58 @@
         </div>
     </div>
 
+    <div class="row">
+
+        <div class="col-md-4">
+
+            <div class="panel panel-default panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-chevron-down"></i>
+                        {{ 'model.operation.header.incomes' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body text-center">
+                    {{ statistics.incomes | number_format(2, '.', ',') }} zł
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="panel panel-default panel-danger">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                        {{ 'model.operation.header.expenses' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body text-center">
+                    {{ statistics.expenses | number_format(2, '.', ',') }} zł
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="panel panel-default panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-retweet"></i>
+                        {{ 'model.operation.header.balance' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body text-center">
+                    {{ statistics.balance | number_format(2, '.', ',') }} zł
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="table-responsive">
@@ -25,7 +77,7 @@
                         <td>{{ operation.id }}</td>
                         <td>{{ operation.date | date('Y-m-d H:i') }}</td>
                         <td>{{ operation.name }}</td>
-                        <td>{{ operation.amount }}</td>
+                        <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                     </tr>
                     {% endfor %}
                 </table>
