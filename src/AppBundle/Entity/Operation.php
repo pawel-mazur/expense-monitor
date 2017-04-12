@@ -16,7 +16,7 @@ class Operation
      * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      *
-     * @var integer
+     * @var int
      */
     protected $id;
 
@@ -51,7 +51,7 @@ class Operation
     protected $status;
 
     /**
-     * @return integer
+     * @return int
      */
     public function getId()
     {

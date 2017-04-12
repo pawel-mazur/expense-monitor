@@ -22,7 +22,7 @@ class DefaultController extends Controller
         $form = $this->get('form.factory')->create(ImportType::class);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->get('app.util.file_importer')->import($form->get('file')->getData());
                 $this->addFlash('success', $this->get('translator')->trans('flash.form.success'));

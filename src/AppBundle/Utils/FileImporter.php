@@ -29,8 +29,7 @@ class FileImporter
 
         $first = true;
         while (false !== $data = fgetcsv($handle)) {
-
-            if(true === $first) {
+            if (true === $first) {
                 $first = false;
                 continue;
             }
