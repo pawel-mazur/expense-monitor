@@ -11,3 +11,8 @@ services:
     app.util.file_importer:
         class: AppBundle\Utils\FileImporter
         arguments: ['@doctrine.orm.entity_manager']
+    app.util.oauto_aware_user_provider:
+        class: AppBundle\Utils\OAuthAwareUserProvider
+        arguments: ['@doctrine', 'AppBundle\Entity\User', {google: google_id}]
+        tags:
+          - { name: user.provider }

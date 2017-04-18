@@ -17,6 +17,8 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $user = $this->getUser();
+
         $em = $this->get('doctrine.orm.entity_manager');
 
         $form = $this->get('form.factory')->create(ImportType::class);
