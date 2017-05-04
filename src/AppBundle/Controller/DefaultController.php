@@ -43,7 +43,7 @@ class DefaultController extends Controller
         return [
             'form' => $form->createView(),
             'statistics' => $statistics,
-            'operations' => $em->getRepository(Operation::class)->findAll(),
+            'operations' => $em->getRepository(Operation::class)->findBy(['user' => $this->getUser()]),
         ];
     }
 

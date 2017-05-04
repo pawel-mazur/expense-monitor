@@ -6,6 +6,7 @@ use AppBundle\Entity\Import;
 use AppBundle\Entity\Operation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Constraints\DateTime;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -21,6 +22,11 @@ class FileImporter
      * @var ValidatorInterface
      */
     protected $validator;
+
+    /**
+     * @var TokenStorageInterface
+     */
+    private $tokenStorage;
 
     /**
      * @var string
@@ -40,15 +46,18 @@ class FileImporter
     /**
      * FileImporter constructor.
      *
-     * @param EntityManager      $entityManager
-     * @param ValidatorInterface $validator
+     * @param EntityManager         $entityManager
+     * @param ValidatorInterface    $validator
+     * @param TokenStorageInterface $tokenStorage
      * @param $importDir
      */
-    public function __construct(EntityManager $entityManager, ValidatorInterface $validator, $importDir)
+    public function __construct(EntityManager $entityManager, ValidatorInterface $validator, TokenStorageInterface $tokenStorage, $importDir)
     {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
+        $this->tokenStorage = $tokenStorage;
         $this->importDir = $importDir;
+
         $this->operations = new ArrayCollection();
     }
 
@@ -70,6 +79,7 @@ class FileImporter
             $operation->setDate(new \DateTime($data[1]));
             $operation->setName(iconv('windows-1250', 'utf-8', $data[6]));
             $operation->setAmount($data[3]);
+            $operation->setUser($this->tokenStorage->getToken()->getUser());
             $operation->setStatus(1);
 
             $errors = $this->validator->validate($operation);

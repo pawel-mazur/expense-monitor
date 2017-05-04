@@ -11,4 +11,4 @@ services:
             - { name: form.type, alias: AppBundle\Form\ImportType }
     app.util.file_importer:
         class: AppBundle\Utils\FileImporter
-        arguments: ['@doctrine.orm.entity_manager', '@validator', '%import_dir%']
+        arguments: ['@doctrine.orm.entity_manager', '@validator', '@security.token_storage', '%import_dir%']

@@ -21,6 +21,14 @@ class Operation
     protected $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @ORM\JoinColumn(name="id_user", nullable=false)
+     *
+     * @var User
+     */
+    protected $user;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Import", inversedBy="operations")
      * @ORM\JoinColumn(name="id_import", nullable=true)
      *
@@ -66,6 +74,22 @@ class Operation
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return User
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param User $user
+     */
+    public function setUser(User $user)
+    {
+        $this->user = $user;
     }
 
     /**
