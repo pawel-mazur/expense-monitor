@@ -13,14 +13,27 @@ flash:
 form:
   file:
     label: 'Plik'
+  edit:
+    label: 'Edytuj'
+    flash: 'Pomyślnie edytowano zmiany'
+  save:
+    label: 'Zapisz'
+    flash: 'Pomyślnie zapisano zmiany'
   submit:
     label: 'Prześlij'
+    flash: 'Pomyślnie przesłano dane'
+  delete:
+    label: 'Usuń'
+    flash: 'Pomyślnie usunięto obiekt'
+  return:
+    label: 'Wróć'
   import:
     label: 'Importuj'
 
 model:
   operation:
     _title: 'Operacja'
+    _title_plural: 'Operacje'
     id: '#id'
     date: 'Data'
     name: 'Nazwa'
@@ -30,3 +43,6 @@ model:
       expenses: 'Wydatki'
       balance: 'Bilans'
       count: 'Wszystkich operacji'
+    menu:
+      list: 'Lista operacji'
+      add: 'Dodaj operacje'

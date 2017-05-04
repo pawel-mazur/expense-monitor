@@ -1,11 +1,11 @@
-{% extends '::base.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block body %}
 
     <div class="table-responsive">
         <table class="table table-bordered">
             {% set date = null %}
-            {% for operation in importer.operations %}
+            {% for operation in operations %}
 
                 {% if date is null or date != operation.date %}
                     {% set date = operation.date %}
@@ -14,7 +14,7 @@
                     </tr>
                 {% endif %}
                 <tr>
-                    <td>{{ operation.name }}</td>
+                    <td><a href="{{ path('operation_edit', {'id': operation.id }) }}" class="center-block">{{ operation.name }}</a></td>
                     <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                 </tr>
 
@@ -22,11 +22,4 @@
         </table>
     </div>
 
-    <div class="panel panel-default">
-        <div class="panel-body">
-            {{ form(form) }}
-        </div>
-    </div>
-
 {% endblock %}
-

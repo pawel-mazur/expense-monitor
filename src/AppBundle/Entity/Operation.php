@@ -37,9 +37,9 @@ class Operation
     protected $import;
 
     /**
-     * @ORM\Column(name="date", type="datetime", nullable=false)
+     * @ORM\Column(name="date", type="date", nullable=false)
      *
-     * @Assert\DateTime()
+     * @Assert\Date()
      *
      * @var \DateTime
      */
