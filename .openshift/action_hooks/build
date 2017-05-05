@@ -8,4 +8,4 @@ ln -s $OPENSHIFT_DATA_DIR/parameters.yml $OPENSHIFT_REPO_DIR/app/config/paramete
 ln -s $OPENSHIFT_DATA_DIR/vendor $OPENSHIFT_REPO_DIR/vendor
 ln -s $OPENSHIFT_DATA_DIR/assets $OPENSHIFT_REPO_DIR/web/vendor
 
-cd $OPENSHIFT_REPO_DIR; composer install;
+cd $OPENSHIFT_REPO_DIR && composer install && bin/dep build:prod --force
