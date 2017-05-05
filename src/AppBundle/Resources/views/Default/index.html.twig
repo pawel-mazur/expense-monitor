@@ -14,7 +14,7 @@
 
         <div class="col-md-4">
 
-            <div class="panel panel-default panel-success">
+            <div class="panel panel-success">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <i class="glyphicon glyphicon-chevron-down"></i>
@@ -22,7 +22,7 @@
                     </h3>
                 </div>
                 <div class="panel-body text-center">
-                    {{ statistics.incomes | number_format(2, '.', ',') }} zł
+                    {{ statistics.incomes | number_format(2, ',', ' ') }} zł
                 </div>
             </div>
 
@@ -30,7 +30,7 @@
 
         <div class="col-md-4">
 
-            <div class="panel panel-default panel-danger">
+            <div class="panel panel-danger">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <i class="glyphicon glyphicon-chevron-up"></i>
@@ -38,7 +38,7 @@
                     </h3>
                 </div>
                 <div class="panel-body text-center">
-                    {{ statistics.expenses | number_format(2, '.', ',') }} zł
+                    {{ statistics.expenses | number_format(2, ',', ' ') }} zł
                 </div>
             </div>
 
@@ -46,7 +46,7 @@
 
         <div class="col-md-4">
 
-            <div class="panel panel-default panel-info">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <i class="glyphicon glyphicon-retweet"></i>
@@ -54,12 +54,74 @@
                     </h3>
                 </div>
                 <div class="panel-body text-center">
-                    {{ statistics.balance | number_format(2, '.', ',') }} zł
+                    {{ statistics.balance | number_format(2, ',', ' ') }} zł
                 </div>
             </div>
 
         </div>
 
     </div>
+
+    <nav aria-label="date-top-nav">
+        <ul class="pager">
+            <li class="previous"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('-1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&larr;</span></a></li>
+            <li><a href="{{ path('homepage', {dateFrom: dateFrom | date('Y-m-d'), dateTo: dateTo | date('Y-m-d')}) }}"><i class="glyphicon glyphicon-calendar"></i> {{ dateFrom | date('Y-m-d') }} - {{ dateTo | date('Y-m-d') }}</a></li>
+            <li class="next"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('+1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&rarr;</span></a></li>
+        </ul>
+    </nav>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <i class="glyphicon glyphicon-tasks"></i>
+                {{ 'model.operation.header.summary' | trans }}
+            </h3>
+        </div>
+        <div class="panel-body text-center">
+            {% if summary is not empty%}
+            <div id="summary-chart"></div>
+            {% else %}
+            <div class="alert alert-info">{{ 'model.operation.info.no_data' | trans }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <nav aria-label="date-top-nav">
+        <ul class="pager">
+            <li class="previous"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('-1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&larr;</span></a></li>
+            <li class="next"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('+1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&rarr;</span></a></li>
+        </ul>
+    </nav>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        new Morris.Line({
+            // ID of the element in which to draw the chart.
+            element: 'summary-chart',
+            // Chart data records -- each entry in this array corresponds to a point on
+            // the chart.
+            data: [
+            {% set sum = summaryStart %}
+            {% for day in summary %}
+                {% set sum = sum + day.amount %}
+                { day: '{{ day.date | date('Y-m-d') }}', summary: '{{ sum | number_format(2,'.','') }}'}{% if not loop.last %},{% endif %}
+            {% endfor %}
+            ],
+            // The name of the data record attribute that contains x-values.
+            xkey: 'day',
+            // A list of names of data record attributes that contain y-values.
+            ykeys: ['summary'],
+            // Labels for the ykeys -- will be displayed when you hover over the
+            // chart.
+            labels: ['{{ 'model.operation.header.balance' | trans }}'],
+            continuousLine: true,
+            postUnits: ' zł',
+            hideHover: 'auto',
+            resize: true
+        });
+    </script>
 
 {% endblock %}

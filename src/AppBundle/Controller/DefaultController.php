@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Import;
 use AppBundle\Entity\Operation;
 use AppBundle\Form\ImportType;
+use AppBundle\Repository\OperationRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -15,14 +16,16 @@ use Symfony\Component\HttpFoundation\Request;
 class DefaultController extends Controller
 {
     /**
-     * @Route("/", name="homepage")
+     * @Route("/{dateFrom}/{dateTo}", name="homepage")
      * @Template()
      *
-     * @param Request $request
+     * @param Request   $request
+     * @param \DateTime $dateFrom
+     * @param \DateTime $dateTo
      *
      * @return array|RedirectResponse
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, \DateTime $dateFrom = null, \DateTime $dateTo = null)
     {
         $em = $this->get('doctrine.orm.entity_manager');
 
@@ -38,11 +41,30 @@ class DefaultController extends Controller
             return $this->redirectToRoute('import', ['id' => $import->getId()]);
         }
 
-        $statistics = $this->get('doctrine.orm.entity_manager')->getRepository(Operation::class)->getStatistics()[0];
+        /** @var OperationRepository $operationRepository */
+        $operationRepository = $this->get('doctrine.orm.entity_manager')->getRepository(Operation::class);
+
+        $date = new \DateTime();
+        if ($dateFrom === null) {
+            $dateFrom = clone $date;
+            $dateFrom->sub(new \DateInterval('P1M'));
+            $dateTo = clone $date;
+        } elseif ($dateTo === null) {
+            $dateTo = clone $dateFrom;
+            $dateTo->add(new \DateInterval('P1M'));
+        }
+
+        $statistics = $operationRepository->getStatistics($this->getUser(), $dateFrom, $dateTo)[0];
+        $summaryStart = $operationRepository->getOperationsSumQB($this->getUser(), null, $dateFrom)->getQuery()->getSingleScalarResult();
+        $summary = $operationRepository->getSummary($this->getUser(), $dateFrom, $dateTo)->getQuery()->getResult();
 
         return [
             'form' => $form->createView(),
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
             'statistics' => $statistics,
+            'summaryStart' => $summaryStart,
+            'summary' => $summary,
         ];
     }
 

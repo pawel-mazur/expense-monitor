@@ -42,7 +42,10 @@ model:
       incomes: 'Przychody'
       expenses: 'Wydatki'
       balance: 'Bilans'
+      summary: 'Podsumowanie'
       count: 'Wszystkich operacji'
     menu:
       list: 'Lista operacji'
       add: 'Dodaj operacje'
+    info:
+      no_data: 'Brak operacji do wyświetlenia'
