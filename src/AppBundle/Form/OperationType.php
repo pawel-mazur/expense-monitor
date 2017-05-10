@@ -23,6 +23,16 @@ class OperationType extends AbstractType
                 DateType::class,
                 [
                     'label' => 'model.operation.date',
+                    'widget' => 'single_text',
+                    'format' => 'yyyy.MM.dd',
+                    'attr' => [
+                        'class' => 'form-control input-inline datepicker',
+                        'data-provide' => 'datepicker',
+                        'data-date-autoclose' => true,
+                        'data-date-format' => 'yyyy.mm.dd',
+                        'data-date-language' => 'pl',
+                    ],
+                    'required' => true,
                 ]
             )
             ->add(
@@ -30,6 +40,7 @@ class OperationType extends AbstractType
                 null,
                 [
                     'label' => 'model.operation.name',
+                    'required' => true,
                 ]
             )
             ->add(
@@ -37,6 +48,7 @@ class OperationType extends AbstractType
                 null,
                 [
                     'label' => 'model.operation.amount',
+                    'required' => true,
                 ]
             );
 

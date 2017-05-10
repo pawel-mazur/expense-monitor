@@ -49,6 +49,7 @@
                                     <li><a href="{{ path('operation_new') }}">{{ 'model.operation.menu.add' | trans }}</a></li>
                                 </ul>
                             </li>
+                            <li><a href="{{ path('import_index') }}">{{ 'model.import._title' | trans }}</a></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
                             <li class="dropdown">
@@ -89,7 +90,13 @@
         <script src="{{ asset('vendor/bootstrap-datepicker/dist/locales/bootstrap-datepicker.pl.min.js') }}"></script>
         <script src="{{ asset('vendor/raphael/raphael.min.js') }}"></script>
         <script src="{{ asset('vendor/morris.js/morris.min.js') }}"></script>
-        {% block javascripts %}{% endblock %}
+        {% block javascripts %}
+        <script>
+
+            $('.datepicker').datepicker();
+
+        </script>
+        {% endblock %}
 
     </body>
 </html>

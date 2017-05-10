@@ -37,6 +37,8 @@ calendar:
   decade: 'dekada'
 
 model:
+  import:
+    _title: 'Import'
   operation:
     _title: 'Operacja'
     _title_plural: 'Operacje'
