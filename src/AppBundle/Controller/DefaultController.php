@@ -46,13 +46,26 @@ class DefaultController extends Controller
 
         $date = new \DateTime();
         if ($dateFrom === null) {
-            $dateFrom = clone $date;
-            $dateFrom->sub(new \DateInterval('P1M'));
-            $dateTo = clone $date;
-        } elseif ($dateTo === null) {
+            $dateFrom = new \DateTime($date->format('Y-m'));
+        }
+
+        if ($dateTo === null) {
             $dateTo = clone $dateFrom;
             $dateTo->add(new \DateInterval('P1M'));
         }
+
+        $datePrevFrom = clone $dateFrom;
+        $datePrevTo = clone $dateTo;
+        $dateNextFrom = clone $dateFrom;
+        $dateNextTo = clone $dateTo;
+
+        $interval = date_diff($dateFrom, $dateTo);
+        $dates = [
+            'prevFrom' => $datePrevFrom->sub($interval),
+            'prevTo' => $datePrevTo->sub($interval),
+            'nextFrom' => $dateNextFrom->add($interval),
+            'nextTo' => $dateNextTo->add($interval),
+        ];
 
         $statistics = $operationRepository->getStatistics($this->getUser(), $dateFrom, $dateTo)[0];
         $summaryStart = $operationRepository->getOperationsSumQB($this->getUser(), null, $dateFrom)->getQuery()->getSingleScalarResult();
@@ -62,6 +75,7 @@ class DefaultController extends Controller
             'form' => $form->createView(),
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
+            'dates' => $dates,
             'statistics' => $statistics,
             'summaryStart' => $summaryStart,
             'summary' => $summary,

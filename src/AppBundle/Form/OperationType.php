@@ -59,8 +59,9 @@ class OperationType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => Operation::class,
-            'user' => null,
         ));
+
+        $resolver->setRequired('user');
     }
 
     /**

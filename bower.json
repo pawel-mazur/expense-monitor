@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "bootstrap": "^3.3.7",
-    "morris.js": "morrisjs#^0.5.1"
+    "morris.js": "morrisjs#^0.5.1",
+    "bootstrap-datepicker": "^1.6.4"
   }
 }

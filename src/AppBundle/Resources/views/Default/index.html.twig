@@ -64,9 +64,19 @@
 
     <nav aria-label="date-top-nav">
         <ul class="pager">
-            <li class="previous"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('-1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&larr;</span></a></li>
-            <li><a href="{{ path('homepage', {dateFrom: dateFrom | date('Y-m-d'), dateTo: dateTo | date('Y-m-d')}) }}"><i class="glyphicon glyphicon-calendar"></i> {{ dateFrom | date('Y-m-d') }} - {{ dateTo | date('Y-m-d') }}</a></li>
-            <li class="next"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('+1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&rarr;</span></a></li>
+            <li class="previous"><a href="{{ path('homepage', {'dateFrom': dates.prevFrom | date('Y-m-d'), 'dateTo': dates.prevTo | date('Y-m-d')}) }}"><span aria-hidden="true">&larr;</span></a></li>
+
+            <li><a href="#"><i class="glyphicon glyphicon-calendar"></i> <span class="datepicker datapicker-start">{{ dateFrom | date('Y-m-d') }}</span></a></li>
+            <li>-</li>
+            <li><a href="#"><i class="glyphicon glyphicon-calendar"></i> <span class="datepicker datapicker-stop">{{ dateTo | date('Y-m-d') }}</span></a></li>
+            <li>:</li>
+
+            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-1 month') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.month' | trans }}</a></li>
+            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-4 month') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.quarter' | trans }}</a></li>
+            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-1 year') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.year' | trans }}</a></li>
+            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-10 year') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.decade' | trans }}</a></li>
+
+            <li class="next"><a href="{{ path('homepage', {'dateFrom': dates.nextFrom | date('Y-m-d'), 'dateTo': dates.nextTo|  date('Y-m-d')}) }}"><span aria-hidden="true">&rarr;</span></a></li>
         </ul>
     </nav>
 
@@ -88,8 +98,8 @@
 
     <nav aria-label="date-top-nav">
         <ul class="pager">
-            <li class="previous"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('-1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&larr;</span></a></li>
-            <li class="next"><a href="{{ path('homepage', {'dateFrom': dateFrom | date_modify('+1 month') | date('Y-m-d') }) }}"><span aria-hidden="true">&rarr;</span></a></li>
+            <li class="previous"><a href="{{ path('homepage', {'dateFrom': dates.prevFrom | date('Y-m-d'), 'dateTo': dates.prevTo | date('Y-m-d')}) }}"><span aria-hidden="true">&larr;</span></a></li>
+            <li class="next"><a href="{{ path('homepage', {'dateFrom': dates.nextFrom | date('Y-m-d'), 'dateTo': dates.nextTo | date('Y-m-d')}) }}"><span aria-hidden="true">&rarr;</span></a></li>
         </ul>
     </nav>
 
@@ -98,6 +108,34 @@
 {% block javascripts %}
 
     <script>
+
+        function format_date(date){
+            var y = date.getFullYear(),
+                m = date.getMonth() + 1,
+                d = date.getDate();
+
+            function z(i){return (i <= 9 ? '0'+i : i);}
+            return y+'-'+z(m)+'-'+z(d);
+        }
+
+        var dateFrom = "{{ dateFrom | date('Y-m-d') }}";
+        var dateTo = "{{ dateTo | date('Y-m-d') }}";
+        var href = "{{ path('homepage', { dateFrom: 'x', dateTo: 'y'}) }}";
+
+        $('.datepicker.datapicker-start').datepicker({language:'pl'}).on('changeDate', function(e) {
+            dateFrom = format_date(e.date);
+            href = href.replace('x', dateFrom);
+            href = href.replace('y', dateTo);
+            window.location.href = href;
+        });
+
+        $('.datepicker.datapicker-stop').datepicker({language:'pl'}).on('changeDate', function(e) {
+            dateTo = format_date(e.date);
+            href = href.replace('x', dateFrom);
+            href = href.replace('y', dateTo);
+            window.location.href = href;
+        });
+
         new Morris.Line({
             // ID of the element in which to draw the chart.
             element: 'summary-chart',

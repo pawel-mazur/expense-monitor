@@ -7,6 +7,7 @@
         {% block stylesheets %}
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap/dist/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap/dist/css/bootstrap-theme.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/morris.js/morris.css') }}">
         <style>
             body {
@@ -22,78 +23,73 @@
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
-        <div id="container">
+        <div id="container" class="container-fluid">
 
-            <div class="col-md-2 col-lg-3"></div>
-
-            <div class="col-md-8 col-lg-6">
-
-                <nav class="navbar navbar-default">
-                    <div class="container-fluid">
-                        <!-- Brand and toggle get grouped for better mobile display -->
-                        <div class="navbar-header">
-                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                                <span class="sr-only">Toggle navigation</span>
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                                <span class="icon-bar"></span>
-                            </button>
-                            <a class="navbar-brand" href="{{ path('homepage') }}">{{ 'app.title' | trans }}</a>
-                        </div>
-
-                        {% if is_granted("IS_AUTHENTICATED_FULLY") %}
-                        <!-- Collect the nav links, forms, and other content for toggling -->
-                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                            <ul class="nav navbar-nav">
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'model.operation._title_plural' | trans }} <span class="caret"></span></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="{{ path('operation_index') }}">{{ 'model.operation.menu.list' | trans }}</a></li>
-                                        <li><a href="{{ path('operation_new') }}">{{ 'model.operation.menu.add' | trans }}</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                            <ul class="nav navbar-nav navbar-right">
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'layout.hello'|trans({'%username%': app.user.username}) }} <span class="caret"></span></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="{{ path('fos_user_profile_show') }}">{{ 'layout.profile' | trans }}</a></li>
-                                        <li><a href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout' | trans({}, 'FOSUserBundle') }}</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div><!-- /.navbar-collapse -->
-                        {% endif %}
-                    </div><!-- /.container-fluid -->
-                </nav>
-
-                {% block flash %}
-                {% for type, messages in app.session.flashBag.all() %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ type }}" role="alert">{{ message }}</div>
-                    {% endfor %}
-                {% endfor %}
-                {% endblock %}
-                {% block body %}{% endblock %}
-
-                {% block footer %}
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        &copy; {{ "now" | date('Y') }} {{ 'app.title' | trans }}
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="{{ path('homepage') }}">{{ 'app.title' | trans }}</a>
                     </div>
+
+                    {% if is_granted("IS_AUTHENTICATED_FULLY") %}
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'model.operation._title_plural' | trans }} <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ path('operation_index') }}">{{ 'model.operation.menu.list' | trans }}</a></li>
+                                    <li><a href="{{ path('operation_new') }}">{{ 'model.operation.menu.add' | trans }}</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'layout.hello'|trans({'%username%': app.user.username}) }} <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ path('fos_user_profile_show') }}">{{ 'layout.profile' | trans }}</a></li>
+                                    <li><a href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout' | trans({}, 'FOSUserBundle') }}</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div><!-- /.navbar-collapse -->
+                    {% endif %}
+                </div><!-- /.container-fluid -->
+            </nav>
+
+            {% block flash %}
+            {% for type, messages in app.session.flashBag.all() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }}" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+            {% endblock %}
+            {% block body %}{% endblock %}
+
+            {% block footer %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    &copy; {{ "now" | date('Y') }} {{ 'app.title' | trans }}
                 </div>
-                {% endblock %}
-
             </div>
-
-            <div class="col-md-3 col-lg-3"></div>
-
-            <script src="{{ asset('vendor/jquery/dist/jquery.min.js') }}"></script>
-            <script src="{{ asset('vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
-            <script src="{{ asset('vendor/raphael/raphael.min.js') }}"></script>
-            <script src="{{ asset('vendor/morris.js/morris.min.js') }}"></script>
-            {% block javascripts %}{% endblock %}
+            {% endblock %}
 
         </div>
+
+        <script src="{{ asset('vendor/jquery/dist/jquery.min.js') }}"></script>
+        <script src="{{ asset('vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+        <script src="{{ asset('vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
+        <script src="{{ asset('vendor/bootstrap-datepicker/dist/locales/bootstrap-datepicker.pl.min.js') }}"></script>
+        <script src="{{ asset('vendor/raphael/raphael.min.js') }}"></script>
+        <script src="{{ asset('vendor/morris.js/morris.min.js') }}"></script>
+        {% block javascripts %}{% endblock %}
+
     </body>
 </html>

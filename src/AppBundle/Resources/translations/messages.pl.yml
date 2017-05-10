@@ -30,6 +30,12 @@ form:
   import:
     label: 'Importuj'
 
+calendar:
+  month: 'miesiąć'
+  quarter: 'kwartał'
+  year: 'rok'
+  decade: 'dekada'
+
 model:
   operation:
     _title: 'Operacja'

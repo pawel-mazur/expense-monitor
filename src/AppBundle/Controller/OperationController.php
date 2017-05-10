@@ -69,7 +69,7 @@ class OperationController extends Controller
     public function editAction(Request $request, Operation $operation)
     {
         $deleteForm = $this->createDeleteForm($operation);
-        $editForm = $this->createForm('AppBundle\Form\OperationType', $operation);
+        $editForm = $this->createForm('AppBundle\Form\OperationType', $operation, ['user' => $this->getUser()]);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
