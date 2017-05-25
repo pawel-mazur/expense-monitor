@@ -26,6 +26,7 @@ task('database:setup', function () {
 
 task('database:update', function () {
     if (false === input()->getOption('force') && false === askConfirmation('Are you sure?')) throw new RuntimeException();
+    run('{{console}} doctrine:migration:migrate -n --env={{env}}');
     run('{{console}} doctrine:schema:update -n --env={{env}} --force');
 })->desc('Update database schema');
 

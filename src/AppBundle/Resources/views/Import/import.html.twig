@@ -7,13 +7,22 @@
             {% set date = null %}
             {% for operation in importer.operations %}
 
-                {% if date is null or date != operation.date %}
+                {% if loop.first or date != operation.date %}
                     {% set date = operation.date %}
                     <tr class="active">
                         <th colspan="2">{{ operation.date | date('d.m.Y') }}</th>
                     </tr>
+                {% elseif date is null %}
+                    <tr class="active">
+                        <th colspan="2">{{ 'import.date.abnormal' | trans }}</th>
+                    </tr>
                 {% endif %}
-                <tr>
+                <tr class="
+                    {% if operation.status == constant('AppBundle\\Entity\\Operation::STATUS_CORRECT') %}success
+                    {% elseif operation.status == constant('AppBundle\\Entity\\Operation::STATUS_DUPLICATED') %}warning
+                    {% elseif operation.status == constant('AppBundle\\Entity\\Operation::STATUS_INVALID') %}danger
+                    {% endif %}
+                ">
                     <td>{{ operation.name }}</td>
                     <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                 </tr>

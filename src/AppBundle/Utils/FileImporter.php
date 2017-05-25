@@ -7,7 +7,7 @@ use AppBundle\Entity\Operation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Constraints\DateTime;
+use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -72,17 +72,30 @@ class FileImporter
                 continue;
             }
 
-            $errors = $this->validator->validate($data[1], new DateTime());
-
             $operation = new Operation();
             $operation->setImport($import);
-            $operation->setDate(new \DateTime($data[1]));
+
+            $errors = $this->validator->validate($data[1], new Date());
+
+            if (false == count($errors)) {
+                $operation->setDate(new \DateTime($data[1]));
+            } else {
+                $operation->setDate(new \DateTime());
+            }
+
+            $operation->setStatus(Operation::STATUS_CORRECT);
             $operation->setName(iconv('windows-1250', 'utf-8', $data[6]));
             $operation->setAmount($data[3]);
             $operation->setUser($this->tokenStorage->getToken()->getUser());
-            $operation->setStatus(1);
+            $operation->setHash();
 
             $errors = $this->validator->validate($operation);
+
+            if ($this->entityManager->getRepository(Operation::class)->findOneByHash($operation->getHash())) {
+                $operation->setStatus(Operation::STATUS_DUPLICATED);
+            } elseif (count($errors)) {
+                $operation->setStatus(Operation::STATUS_INVALID);
+            }
 
             $this->operations->add($operation);
         }
@@ -93,7 +106,9 @@ class FileImporter
     public function import()
     {
         foreach ($this->getOperations() as $operation) {
-            $this->entityManager->persist($operation);
+            if ($operation->getStatus() === Operation::STATUS_CORRECT) {
+                $this->entityManager->persist($operation);
+            }
         }
 
         $this->entityManager->flush();

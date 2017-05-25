@@ -11,6 +11,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Operation
 {
+    const STATUS_CORRECT = 1;
+    const STATUS_DUPLICATED = 2;
+    const STATUS_INVALID = 3;
+
     /**
      * @ORM\Id
      * @ORM\Column(name="id", type="integer")
@@ -40,6 +44,7 @@ class Operation
      * @ORM\Column(name="date", type="date", nullable=false)
      *
      * @Assert\Date()
+     * @Assert\NotBlank()
      *
      * @var \DateTime
      */
@@ -47,6 +52,8 @@ class Operation
 
     /**
      * @ORM\Column(name="name", type="text", nullable=false)
+     *
+     * @Assert\NotBlank()
      *
      * @var string
      */
@@ -64,9 +71,20 @@ class Operation
     /**
      * @ORM\Column(name="status", type="integer", nullable=false)
      *
+     * @Assert\NotBlank()
+     *
      * @var string
      */
     protected $status;
+
+    /**
+     * @ORM\Column(name="hash", type="string", nullable=false)
+     *
+     * @Assert\NotBlank()
+     *
+     * @var string
+     */
+    protected $hash;
 
     /**
      * @return int
@@ -170,5 +188,18 @@ class Operation
     public function setStatus($status)
     {
         $this->status = $status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash()
+    {
+        return $this->hash;
+    }
+
+    public function setHash()
+    {
+        $this->hash = hash('md5', sprintf('%s%s%s', $this->getDate()->format('Y-m-d'), $this->name, $this->amount));
     }
 }

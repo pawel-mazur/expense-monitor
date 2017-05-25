@@ -62,6 +62,7 @@ class OperationType extends AbstractType
 
         $operation->setUser($event->getForm()->getConfig()->getOption('user'));
         $operation->setStatus(1);
+        $operation->setHash();
     }
 
     /**

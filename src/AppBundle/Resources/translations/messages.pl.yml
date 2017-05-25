@@ -57,3 +57,7 @@ model:
       add: 'Dodaj operacje'
     info:
       no_data: 'Brak operacji do wyświetlenia'
+
+import:
+  date:
+      abnormal: 'Nieprawodłowo określona data importu'
