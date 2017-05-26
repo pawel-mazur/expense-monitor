@@ -16,7 +16,7 @@ class ImportFileValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint)
     {
-        if ('text/csv' !== $value->getClientMimeType()) {
+        if (false === in_array($value->getClientMimeType(), ['text/csv', 'text/comma-separated-values'])) {
             $this->context->buildViolation($constraint->mimeTypesMessage)
                 ->setParameter('{{ file }}', $this->formatValue($value->getPathname()))
                 ->setParameter('{{ type }}', $this->formatValue($value->getMimeType()))

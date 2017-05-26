@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+
+    web:
+        image: pakumaz/spending-monitor
+        build: .
+        ports:
+            - $WEB_PORT
+        volumes:
+            - .:/var/www/html
+        links:
+            - database
+        environment:
+            XDEBUG_CONFIG: $XDEBUG_CONFIG
+            PHP_IDE_CONFIG: $PHP_IDE_CONFIG
+
+    composer:
+        image: composer
+        command:
+            - composer
+            - install
+        volumes:
+            - ~/.composer:/tmp
+            - .:/app
+
+    npm:
+        image: node
+        working_dir: /app
+        command:
+            - npm
+            - install
+        volumes:
+            - .:/app
+
+    database:
+        image: postgres
+        ports:
+            - $DATABASE_PORT
+        environment:
+            POSTGRES_USER: spendingmonitor
+            POSTGRES_PASSWORD: spendingmonitor

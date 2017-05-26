@@ -1,14 +1,16 @@
-hosts.php
 /app/config/parameters.yml
-/build/
 /bin/*
 !/bin/console
 !/bin/symfony_requirements
 /phpunit.xml
+/node_modules
 /var/*
 !/var/cache
 /var/cache/*
 !var/cache/.gitkeep
+!/var/imports
+/var/imports/*
+!var/imports/.gitkeep
 !/var/logs
 /var/logs/*
 !var/logs/.gitkeep
@@ -19,3 +21,4 @@ hosts.php
 /vendor/
 /web/bundles/
 /web/vendor/
+.env
