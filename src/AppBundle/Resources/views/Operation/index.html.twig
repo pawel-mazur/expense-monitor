@@ -2,24 +2,103 @@
 
 {% block body %}
 
+    <div class="row">
+
+        <div class="col-md-3">
+
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-chevron-down"></i>
+                        {{ 'statistic.min' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body text-center">
+                    {{ statistics.min | number_format(2, ',', ' ') }} zł
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-chevron-up"></i>
+                        {{ 'statistic.max' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body text-center">
+                    {{ statistics.max | number_format(2, ',', ' ') }} zł
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-random"></i>
+                        {{ 'statistic.avg' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body text-center">
+                    {{ statistics.avg | number_format(2, ',', ' ') }} zł
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-retweet"></i>
+                        {{ 'statistic.sum' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body text-center">
+                    {{ statistics.sum | number_format(2, ',', ' ') }} zł
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
     <div class="table-responsive">
         <table class="table table-bordered">
+            <thead>
+                <tr class="active">
+                    <th>{{ 'model._common.date' | trans }}</th>
+                    <th>{{ 'model.contact._title' | trans }}</th>
+                    <th>{{ 'model.operation.amount' | trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
             {% set date = null %}
             {% for operation in operations %}
 
                 {% if date is null or date != operation.date %}
                     {% set date = operation.date %}
                     <tr class="active">
-                        <th colspan="2">{{ operation.date | date('d.m.Y') }}</th>
+                        <th colspan="3">{{ operation.date | date('d.m.Y') }}</th>
                     </tr>
                 {% endif %}
                 <tr>
-                    <td><a href="{{ path('operation_edit', {'id': operation.id }) }}" class="center-block">{{ operation.name }}</a></td>
+                    <td><a href="{{ path('operation_edit', {'operation': operation.id }) }}" class="center-block">{{ operation.name }}</a></td>
+                    <td><a href="{{ path('operation_index', {contact: operation.contact.id}) }}">{{ operation.contact.name }}</a></td>
                     <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                 </tr>
 
             {% endfor %}
+            </tbody>
         </table>
+
     </div>
 
 {% endblock %}

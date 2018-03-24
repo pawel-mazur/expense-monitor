@@ -10,5 +10,24 @@
         </div>
     </div>
 
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr class="active">
+                    <th>{{ 'model._common.date' | trans }}</th>
+                    <th>{{ 'model.import.file' | trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for import in imports %}
+                <tr>
+                    <td>{{ import.date | date('Y-m-d') }}</td>
+                    <td><a href="{{ path('import_import', {import: import.id, ignoreExisting: 'ignore'}) }}">{{ import.fileName }}</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 {% endblock %}
 

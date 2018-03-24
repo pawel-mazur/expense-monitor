@@ -38,7 +38,7 @@ task('cache:clear', function() {
     run('{{console}} cache:clear --env={{env}}');
 })->desc('Clear application cache');
 
-task('cs-fix', function () {
+task('cs:fix', function () {
     run('bin/php-cs-fixer fix');
 })->desc('Run cs-fix command');
 

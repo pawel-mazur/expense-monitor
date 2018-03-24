@@ -1,9 +1,13 @@
 app:
   title: 'Monitor wydatków'
 
-layout:
-  hello: 'Witaj, %username%!'
-  profile: 'Profil'
+calendar:
+  day: 'dziś'
+  decade: 'dekada'
+  month: 'miesiąc'
+  quarter: 'kwartał'
+  week: 'tydzień'
+  year: 'rok'
 
 flash:
   form:
@@ -29,35 +33,56 @@ form:
     label: 'Wróć'
   import:
     label: 'Importuj'
+  new:
+    label: 'Dodaj'
+    flash: 'Pomyślnie '
 
-calendar:
-  month: 'miesiąć'
-  quarter: 'kwartał'
-  year: 'rok'
-  decade: 'dekada'
+header:
+  incomes: 'Przychody'
+  expenses: 'Wydatki'
+  balance: 'Bilans'
+  group: 'Rodzaje wydatków'
+  summary: 'Podsumowanie'
+  count: 'Wszystkich operacji'
 
-model:
-  import:
-    _title: 'Import'
-  operation:
-    _title: 'Operacja'
-    _title_plural: 'Operacje'
-    id: '#id'
-    date: 'Data'
-    name: 'Nazwa'
-    amount: 'Kwota'
-    header:
-      incomes: 'Przychody'
-      expenses: 'Wydatki'
-      balance: 'Bilans'
-      summary: 'Podsumowanie'
-      count: 'Wszystkich operacji'
-    menu:
-      list: 'Lista operacji'
-      add: 'Dodaj operacje'
-    info:
-      no_data: 'Brak operacji do wyświetlenia'
+info:
+  no_data: 'Brak danych do wyświetlenia'
 
 import:
   date:
       abnormal: 'Nieprawodłowo określona data importu'
+
+layout:
+  hello: 'Witaj, %username%!'
+  profile: 'Profil'
+
+menu:
+  contact:
+    list: 'Lista kontaktów'
+    add: 'Dodaj kontakt'
+  operation:
+    list: 'Lista operatcji'
+    add: 'Dodaj operacje'
+
+model:
+  _common:
+    id: '#id'
+    date: 'Data'
+    name: 'Nazwa'
+  contact:
+    _title: 'Kontakt'
+    _title_plural: 'Kontakty'
+  import:
+    _title: 'Import'
+    file: 'Plik'
+  operation:
+    _title: 'Operacja'
+    _title_plural: 'Operacje'
+    amount: 'Kwota'
+
+statistic:
+  min: 'Minimum'
+  max: 'Maksimum'
+  avg: 'Średnia'
+  sum: 'Suma'
+

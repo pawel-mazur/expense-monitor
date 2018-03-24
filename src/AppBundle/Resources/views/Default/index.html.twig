@@ -10,11 +10,11 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <i class="glyphicon glyphicon-chevron-down"></i>
-                        {{ 'model.operation.header.incomes' | trans }}
+                        {{ 'header.incomes' | trans }}
                     </h3>
                 </div>
                 <div class="panel-body text-center">
-                    {{ statistics.incomes | number_format(2, ',', ' ') }} zł
+                    {{ statistics.incomes.sum | number_format(2, ',', ' ') }} zł
                 </div>
             </div>
 
@@ -26,11 +26,11 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <i class="glyphicon glyphicon-chevron-up"></i>
-                        {{ 'model.operation.header.expenses' | trans }}
+                        {{ 'header.expenses' | trans }}
                     </h3>
                 </div>
                 <div class="panel-body text-center">
-                    {{ statistics.expenses | number_format(2, ',', ' ') }} zł
+                    {{ statistics.expenses.sum | number_format(2, ',', ' ') }} zł
                 </div>
             </div>
 
@@ -42,7 +42,7 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <i class="glyphicon glyphicon-retweet"></i>
-                        {{ 'model.operation.header.balance' | trans }}
+                        {{ 'header.balance' | trans }}
                     </h3>
                 </div>
                 <div class="panel-body text-center">
@@ -63,8 +63,10 @@
             <li><a href="#"><i class="glyphicon glyphicon-calendar"></i> <span class="datepicker datapicker-stop">{{ dateTo | date('Y-m-d') }}</span></a></li>
             <li>:</li>
 
+            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-1 dey') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.day' | trans }}</a></li>
+            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-1 week') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.week' | trans }}</a></li>
             <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-1 month') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.month' | trans }}</a></li>
-            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-4 month') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.quarter' | trans }}</a></li>
+            <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-3 month') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.quarter' | trans }}</a></li>
             <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-1 year') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.year' | trans }}</a></li>
             <li><a href="{{ path('homepage', {'dateFrom': 'now' | date_modify('-10 year') | date('Y-m-d'), 'dateTo': 'now' | date('Y-m-d') }) }}">{{ 'calendar.decade' | trans }}</a></li>
 
@@ -72,18 +74,98 @@
         </ul>
     </nav>
 
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-tasks"></i>
+                        {{ 'header.expenses' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    {% if operations.expenses is not empty%}
+                    <div class="text-center">
+                        <div id="groups-expenses-chart"></div>
+                    </div>
+                    <div class="table-responsive" style="height: 400px;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>{{ 'model.contact._title' | trans }}</th>
+                                    <th>{{ 'model.operation.amount' | trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for group in operations.expenses %}
+                            <tr>
+                                <td><a href="{{ path('operation_index', {contact: group.contact_id}) }}">{{ group.contact_name }}</a></td>
+                                <td class="text-right">{{ group.amount | number_format(2,'.','') }}&nbsp;zł</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-tasks"></i>
+                        {{ 'header.incomes' | trans }}
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    {% if operations.incomes is not empty%}
+                    <div class="text-center">
+                        <div id="groups-incomes-chart"></div>
+                    </div>
+                    <div class="table-responsive" style="height: 400px;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>{{ 'model.contact._title' | trans }}</th>
+                                    <th>{{ 'model.operation.amount' | trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for group in operations.incomes %}
+                            <tr>
+                                <td><a href="{{ path('operation_index', {contact: group.contact_id}) }}">{{ group.contact_name }}</a></td>
+                                <td class="text-right">{{ group.amount | number_format(2,'.','') }}&nbsp;zł</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">
                 <i class="glyphicon glyphicon-tasks"></i>
-                {{ 'model.operation.header.summary' | trans }}
+                {{ 'header.summary' | trans }}
             </h3>
         </div>
         <div class="panel-body text-center">
-            {% if summary is not empty%}
+            {% if operations.all is not empty%}
             <div id="summary-chart"></div>
             {% else %}
-            <div class="alert alert-info">{{ 'model.operation.info.no_data' | trans }}</div>
+            <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
             {% endif %}
         </div>
     </div>
@@ -128,30 +210,55 @@
             window.location.href = href;
         });
 
+        new Morris.Donut({
+            element: 'groups-expenses-chart',
+            formatter: function (y, data) {
+                return y + ' zł';
+            },
+            data: [
+            {% for group in operations.expenses | slice(0, 10) %}
+                { label: '{{ group.contact_name }}', value: '{{ group.amount | number_format(2,'.','') }}'}{% if not loop.last %},{% endif %}
+            {% endfor %}
+            ]
+        });
+
+        new Morris.Donut({
+            element: 'groups-incomes-chart',
+            formatter: function (y, data) {
+                return y + ' zł';
+            },
+            data: [
+            {% for group in operations.incomes | slice(0, 10) %}
+                { label: '{{ group.contact_name }}', value: '{{ group.amount | number_format(2,'.','') }}'}{% if not loop.last %},{% endif %}
+            {% endfor %}
+            ]
+        });
+
         new Morris.Line({
             // ID of the element in which to draw the chart.
             element: 'summary-chart',
             // Chart data records -- each entry in this array corresponds to a point on
             // the chart.
             data: [
-            {% set sum = summaryStart %}
-            {% for day in summary %}
-                {% set sum = sum + day.amount %}
-                { day: '{{ day.date | date('Y-m-d') }}', summary: '{{ sum | number_format(2,'.','') }}'}{% if not loop.last %},{% endif %}
+            {% set sum = statistics.start %}
+            {% for day in operations.all %}
+                {% set sum = sum + day.sum %}
+                { day: '{{ day.date }}', operations: {{ sum | number_format(2,'.','') }} }{% if not loop.last %},{% endif %}
             {% endfor %}
             ],
             // The name of the data record attribute that contains x-values.
             xkey: 'day',
             // A list of names of data record attributes that contain y-values.
-            ykeys: ['summary'],
+            ykeys: ['operations'],
             // Labels for the ykeys -- will be displayed when you hover over the
             // chart.
-            labels: ['{{ 'model.operation.header.balance' | trans }}'],
+            labels: ['{{ 'header.balance' | trans }}'],
             continuousLine: true,
             postUnits: ' zł',
             hideHover: 'auto',
             resize: true
         });
+
     </script>
 
 {% endblock %}

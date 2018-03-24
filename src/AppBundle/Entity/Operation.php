@@ -33,6 +33,14 @@ class Operation
     protected $user;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Contact", inversedBy="operations")
+     * @ORM\JoinColumn(name="id_contact", nullable=false)
+     *
+     * @var Contact
+     */
+    protected $contact;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Import", inversedBy="operations")
      * @ORM\JoinColumn(name="id_import", nullable=true)
      *
@@ -108,6 +116,22 @@ class Operation
     public function setUser(User $user)
     {
         $this->user = $user;
+    }
+
+    /**
+     * @return Contact
+     */
+    public function getContact()
+    {
+        return $this->contact;
+    }
+
+    /**
+     * @param Contact $contact
+     */
+    public function setContact(Contact $contact)
+    {
+        $this->contact = $contact;
     }
 
     /**

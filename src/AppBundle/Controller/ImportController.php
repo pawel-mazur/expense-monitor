@@ -34,31 +34,38 @@ class ImportController extends Controller
             $em->persist($import);
             $em->flush();
 
-            return $this->redirectToRoute('import_import', ['id' => $import->getId()]);
+            return $this->redirectToRoute('import_import', ['import' => $import->getId()]);
         }
+
+        /**
+         * @var Import[]
+         */
+        $imports = $em->getRepository(Import::class)->findBy(['user' => $this->getUser()], ['date' => 'DESC']);
 
         return [
             'form' => $form->createView(),
+            'imports' => $imports,
         ];
     }
 
     /**
-     * @Route("/import/{id}", name="import_import")
+     * @Route("/import/{import}/{ignoreExisting}", name="import_import", requirements={"ignoreExisting"="ignore"})
      * @Template()
      *
      * @param Request $request
      * @param Import  $import
+     * @param bool    $ignoreExisting
      *
      * @return array|RedirectResponse
      */
-    public function importAction(Request $request, Import $import)
+    public function importAction(Request $request, Import $import, $ignoreExisting = false)
     {
         $importer = $this->get('app.util.file_importer');
 
         $form = $this->createFormBuilder()->add('submit', SubmitType::class, ['label' => 'form.import.label', 'attr' => ['class' => 'btn btn-success form-control']])->getForm();
         $form->handleRequest($request);
 
-        $importer->load($import);
+        $importer->load($import, $ignoreExisting);
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {

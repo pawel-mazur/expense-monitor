@@ -2,13 +2,20 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Contact;
 use AppBundle\Entity\Operation;
+use DateTime;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Date;
 
 class OperationType extends AbstractType
 {
@@ -17,19 +24,23 @@ class OperationType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        /** @var Operation $operation */
+        $operation = $options['data'];
+
         $builder
             ->add(
                 'date',
                 DateType::class,
                 [
-                    'label' => 'model.operation.date',
+                    'label' => 'model._common.date',
                     'widget' => 'single_text',
-                    'format' => 'yyyy.MM.dd',
+                    'format' => 'dd.MM.yyyyy',
+                    'data' => null === $operation->getDate() ? new DateTime() : $operation->getDate(),
                     'attr' => [
                         'class' => 'form-control input-inline datepicker',
                         'data-provide' => 'datepicker',
                         'data-date-autoclose' => true,
-                        'data-date-format' => 'yyyy.mm.dd',
+                        'data-date-format' => 'dd.mm.yyyy',
                         'data-date-language' => 'pl',
                     ],
                     'required' => true,
@@ -37,31 +48,48 @@ class OperationType extends AbstractType
             )
             ->add(
                 'name',
-                null,
+                TextType::class,
                 [
-                    'label' => 'model.operation.name',
+                    'label' => 'model._common.name',
+                    'required' => true,
+                ]
+            )
+            ->add(
+                'contact',
+                EntityType::class,
+                [
+                    'label' => 'model.contact._title',
+                    'class' => Contact::class,
+                    'choice_label' => 'name',
+                    'query_builder' => function (EntityRepository $repository) {
+                        return $repository->createQueryBuilder('contact')
+                            ->orderBy('contact.name');
+                    },
                     'required' => true,
                 ]
             )
             ->add(
                 'amount',
-                null,
+                NumberType::class,
                 [
                     'label' => 'model.operation.amount',
                     'required' => true,
                 ]
             );
 
-        $builder->addEventListener(FormEvents::POST_SUBMIT, [$this, 'postSubmit']);
+        $builder->addEventListener(FormEvents::SUBMIT, [$this, 'postSubmit']);
     }
 
+    /**
+     * @param FormEvent $event
+     */
     public function postSubmit(FormEvent $event)
     {
         /** @var Operation $operation */
-        $operation = $event->getForm()->getData();
+        $operation = $event->getData();
 
         $operation->setUser($event->getForm()->getConfig()->getOption('user'));
-        $operation->setStatus(1);
+        $operation->setStatus(Operation::STATUS_CORRECT);
         $operation->setHash();
     }
 
@@ -70,18 +98,13 @@ class OperationType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'data_class' => Operation::class,
-        ));
+        ]);
 
-        $resolver->setRequired('user');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix()
-    {
-        return 'appbundle_operation';
+        $resolver->setRequired([
+            'user',
+            'data',
+        ]);
     }
 }

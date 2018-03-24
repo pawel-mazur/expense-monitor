@@ -48,17 +48,25 @@ class DefaultController extends Controller
             'nextTo' => $dateNextTo->add($interval),
         ];
 
-        $statistics = $operationRepository->getStatistics($this->getUser(), $dateFrom, $dateTo)[0];
-        $summaryStart = $operationRepository->getOperationsSumQB($this->getUser(), null, $dateFrom)->getQuery()->getSingleScalarResult();
-        $summary = $operationRepository->getSummary($this->getUser(), $dateFrom, $dateTo)->getQuery()->getResult();
+        $statistics = [
+            'start' => $operationRepository->getOperationsSumQB($this->getUser(), null, $dateFrom)->execute()->fetchColumn(),
+            'balance' => $operationRepository->getOperationsSumQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchColumn(),
+            'expenses' => $operationRepository->getOperationsSumExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetch(),
+            'incomes' => $operationRepository->getOperationsSumIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetch(),
+        ];
+
+        $operations = [
+            'all' => $operationRepository->getOperationsSumGroupByDate($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+            'expenses' => $operationRepository->getOperationsSumGroupByContactExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+            'incomes' => $operationRepository->getOperationsSumGroupByContactIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+        ];
 
         return [
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
             'dates' => $dates,
             'statistics' => $statistics,
-            'summaryStart' => $summaryStart,
-            'summary' => $summary,
+            'operations' => $operations,
         ];
     }
 }

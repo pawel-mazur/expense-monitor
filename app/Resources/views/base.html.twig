@@ -43,10 +43,17 @@
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
                             <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'model.contact._title_plural' | trans }} <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{{ path('contact_index') }}">{{ 'menu.contact.list' | trans }}</a></li>
+                                    <li><a href="{{ path('contact_new') }}">{{ 'menu.contact.add' | trans }}</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ 'model.operation._title_plural' | trans }} <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="{{ path('operation_index') }}">{{ 'model.operation.menu.list' | trans }}</a></li>
-                                    <li><a href="{{ path('operation_new') }}">{{ 'model.operation.menu.add' | trans }}</a></li>
+                                    <li><a href="{{ path('operation_index') }}">{{ 'menu.operation.list' | trans }}</a></li>
+                                    <li><a href="{{ path('operation_new') }}">{{ 'menu.operation.add' | trans }}</a></li>
                                 </ul>
                             </li>
                             <li><a href="{{ path('import_index') }}">{{ 'model.import._title' | trans }}</a></li>
@@ -62,6 +69,7 @@
                         </ul>
                     </div><!-- /.navbar-collapse -->
                     {% endif %}
+
                 </div><!-- /.container-fluid -->
             </nav>
 

@@ -2,10 +2,15 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Contact;
 use AppBundle\Entity\Operation;
+use AppBundle\Form\OperationType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -18,18 +23,31 @@ class OperationController extends Controller
     /**
      * Lists all operation entities.
      *
-     * @Route("/", name="operation_index")
+     * @Route("/{contact}", name="operation_index", requirements={"contact"="\d+"})
      * @Method("GET")
+     * @Template()
+     *
+     * @param Contact|null $contact
+     *
+     * @return array
      */
-    public function indexAction()
+    public function indexAction(Contact $contact = null)
     {
         $em = $this->getDoctrine()->getManager();
+        $operationRepository = $em->getRepository(Operation::class);
 
-        $operations = $em->getRepository('AppBundle:Operation')->findBy(['user' => $this->getUser()], ['date' => 'DESC']);
+        $operations = $operationRepository
+            ->getOperationsByContactQB($this->getUser(), $contact)
+            ->orderBy('operation.date', 'DESC')
+            ->getQuery()
+            ->getResult();
 
-        return $this->render('@App/Operation/index.html.twig', array(
+        $statistics = $operationRepository->getOperationsSumQB($this->getUser(), null, null, $contact)->execute()->fetch();
+
+        return [
             'operations' => $operations,
-        ));
+            'statistics' => $statistics,
+        ];
     }
 
     /**
@@ -37,60 +55,74 @@ class OperationController extends Controller
      *
      * @Route("/new", name="operation_new")
      * @Method({"GET", "POST"})
+     * @Template()
+     *
+     * @param Request $request
+     *
+     * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function newAction(Request $request)
     {
-        $operation = new Operation();
-        $operation->setDate(new \DateTime());
-        $form = $this->createForm('AppBundle\Form\OperationType', $operation, ['user' => $this->getUser()]);
+        $form = $this->createForm(OperationType::class, new Operation(), ['user' => $this->getUser()]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $operation->setUser($this->getUser());
-            $em->persist($operation);
+            $em->persist($form->getData());
             $em->flush();
 
-            return $this->redirectToRoute('operation_edit', array('id' => $operation->getId()));
+            return $this->redirectToRoute('operation_edit', ['operation' => $form->getData()->getId()]);
         }
 
-        return $this->render('@App/Operation/new.html.twig', array(
-            'operation' => $operation,
+        return [
             'form' => $form->createView(),
-        ));
+        ];
     }
 
     /**
      * Displays a form to edit an existing operation entity.
      *
-     * @Route("/{id}/edit", name="operation_edit")
+     * @Route("/{operation}/edit", name="operation_edit")
      * @Method({"GET", "POST"})
+     * @Template()
+     *
+     * @param Request   $request
+     * @param Operation $operation
+     *
+     * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function editAction(Request $request, Operation $operation)
     {
         $deleteForm = $this->createDeleteForm($operation);
-        $editForm = $this->createForm('AppBundle\Form\OperationType', $operation, ['user' => $this->getUser()]);
+        $editForm = $this->createForm(OperationType::class, $operation, ['user' => $this->getUser()]);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->addFlash('success', $this->get('translator')->trans('form.edit.flash'));
-            $this->getDoctrine()->getManager()->flush();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($editForm->getData());
+            $em->flush();
 
-            return $this->redirectToRoute('operation_edit', array('id' => $operation->getId()));
+            $this->addFlash('success', $this->get('translator')->trans('form.edit.flash'));
+
+            return $this->redirectToRoute('operation_edit', ['operation' => $operation->getId()]);
         }
 
-        return $this->render('@App/Operation/edit.html.twig', array(
-            'operation' => $operation,
-            'edit_form' => $editForm->createView(),
+        return [
             'delete_form' => $deleteForm->createView(),
-        ));
+            'edit_form' => $editForm->createView(),
+        ];
     }
 
     /**
      * Deletes a operation entity.
      *
-     * @Route("/{id}", name="operation_delete")
+     * @Route("/{operation}", name="operation_delete")
      * @Method("DELETE")
+     *
+     * @param Request   $request
+     * @param Operation $operation
+     *
+     * @return RedirectResponse
      */
     public function deleteAction(Request $request, Operation $operation)
     {
@@ -111,13 +143,13 @@ class OperationController extends Controller
      *
      * @param Operation $operation The operation entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createDeleteForm(Operation $operation)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('operation_delete', array('id' => $operation->getId())))
-            ->setMethod('DELETE')
+            ->setAction($this->generateUrl('operation_delete', ['operation' => $operation->getId()]))
+            ->setMethod(Request::METHOD_DELETE)
             ->getForm()
         ;
     }

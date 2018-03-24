@@ -2,6 +2,7 @@
 
 namespace AppBundle\Utils;
 
+use AppBundle\Entity\Contact;
 use AppBundle\Entity\Import;
 use AppBundle\Entity\Operation;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -61,7 +62,7 @@ class FileImporter
         $this->operations = new ArrayCollection();
     }
 
-    public function load(Import $import)
+    public function load(Import $import, $ignoreExisting)
     {
         $handle = fopen(sprintf('%s/%s', $this->importDir, $import->getFileName()), 'r');
 
@@ -71,6 +72,11 @@ class FileImporter
                 $first = false;
                 continue;
             }
+
+            $name = (preg_replace('/.*: /', '', iconv('windows-1250', 'utf-8', $data[7])));
+            $contact = new Contact();
+            $contact->setName($name);
+            $contact->setUser($this->tokenStorage->getToken()->getUser());
 
             $operation = new Operation();
             $operation->setImport($import);
@@ -87,6 +93,7 @@ class FileImporter
             $operation->setName(iconv('windows-1250', 'utf-8', $data[6]));
             $operation->setAmount($data[3]);
             $operation->setUser($this->tokenStorage->getToken()->getUser());
+            $operation->setContact($contact);
             $operation->setHash();
 
             $errors = $this->validator->validate($operation);
@@ -97,7 +104,9 @@ class FileImporter
                 $operation->setStatus(Operation::STATUS_INVALID);
             }
 
-            $this->operations->add($operation);
+            if (Operation::STATUS_DUPLICATED !== $operation->getStatus() || false === $ignoreExisting) {
+                $this->operations->add($operation);
+            }
         }
 
         fclose($handle);
@@ -107,11 +116,16 @@ class FileImporter
     {
         foreach ($this->getOperations() as $operation) {
             if ($operation->getStatus() === Operation::STATUS_CORRECT) {
+                if ($contact = $this->entityManager->getRepository(Contact::class)->findOneBy(['name' => $operation->getContact()->getName()])) {
+                    $operation->setContact($contact);
+                } else {
+                    $this->entityManager->persist($operation->getContact());
+                }
+
                 $this->entityManager->persist($operation);
+                $this->entityManager->flush();
             }
         }
-
-        $this->entityManager->flush();
     }
 
     /**

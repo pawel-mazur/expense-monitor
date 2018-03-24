@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme form 'bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block body %}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <ul class="list-inline text-right">
+                <li>
+                    <a class="btn btn-info" href="{{ path('contact_index') }}">{{ 'form.return.label' | trans }}</a>
+                </li>
+            </ul>
+        </div>
+        {{ form_start(form) }}
+        <div class="panel-body">
+            {{ form_widget(form) }}
+        </div>
+        <div class="panel-footer">
+            <ul class="list-inline text-right">
+                <li>
+                    <input type="submit" class="btn btn-success" value="{{ 'form.save.label' | trans }}" />
+                </li>
+            </ul>
+        </div>
+        {{ form_end(form) }}
+    </div>
+
+{% endblock %}
+

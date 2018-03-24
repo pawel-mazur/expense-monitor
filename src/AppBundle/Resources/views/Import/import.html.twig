@@ -10,11 +10,11 @@
                 {% if loop.first or date != operation.date %}
                     {% set date = operation.date %}
                     <tr class="active">
-                        <th colspan="2">{{ operation.date | date('d.m.Y') }}</th>
+                        <th colspan="3">{{ operation.date | date('d.m.Y') }}</th>
                     </tr>
                 {% elseif date is null %}
                     <tr class="active">
-                        <th colspan="2">{{ 'import.date.abnormal' | trans }}</th>
+                        <th colspan="3">{{ 'import.date.abnormal' | trans }}</th>
                     </tr>
                 {% endif %}
                 <tr class="
@@ -23,6 +23,7 @@
                     {% elseif operation.status == constant('AppBundle\\Entity\\Operation::STATUS_INVALID') %}danger
                     {% endif %}
                 ">
+                    <td>{{ operation.contact.name }}</td>
                     <td>{{ operation.name }}</td>
                     <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                 </tr>
