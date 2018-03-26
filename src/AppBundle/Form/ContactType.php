@@ -3,12 +3,9 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Contact;
-use AppBundle\Entity\Operation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContactType extends AbstractType
@@ -27,19 +24,6 @@ class ContactType extends AbstractType
                     'required' => true,
                 ]
             );
-
-        $builder->addEventListener(FormEvents::POST_SUBMIT, [$this, 'postSubmit']);
-    }
-
-    /**
-     * @param FormEvent $event
-     */
-    public function postSubmit(FormEvent $event)
-    {
-        /** @var Operation $operation */
-        $operation = $event->getData();
-
-        $operation->setUser($event->getForm()->getConfig()->getOption('user'));
     }
 
     /**
@@ -50,7 +34,5 @@ class ContactType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Contact::class,
         ]);
-
-        $resolver->setRequired('user');
     }
 }

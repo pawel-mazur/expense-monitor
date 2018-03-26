@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -13,6 +14,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Import
 {
+    use UserEntityTrait;
+
     /**
      * @ORM\Id
      * @ORM\Column(name="id", type="integer")
@@ -23,19 +26,11 @@ class Import
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
-     * @ORM\JoinColumn(name="id_user", referencedColumnName="id", nullable=false)
-     *
-     * @var User
-     */
-    protected $user;
-
-    /**
      * @ORM\Column(name="date", type="datetimetz", nullable=true)
      *
      * @Assert\DateTime()
      *
-     * @var \DateTime
+     * @var DateTime
      */
     protected $date;
 
@@ -75,23 +70,7 @@ class Import
     }
 
     /**
-     * @return mixed
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param mixed $user
-     */
-    public function setUser(User $user)
-    {
-        $this->user = $user;
-    }
-
-    /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getDate()
     {
@@ -99,11 +78,15 @@ class Import
     }
 
     /**
-     * @param \DateTime $date
+     * @param DateTime $date
+     *
+     * @return $this
      */
-    public function setDate(\DateTime $date)
+    public function setDate(DateTime $date)
     {
         $this->date = $date;
+
+        return $this;
     }
 
     /**
@@ -116,10 +99,14 @@ class Import
 
     /**
      * @param string $fileName
+     *
+     * @return $this
      */
     public function setFileName($fileName)
     {
         $this->fileName = $fileName;
+
+        return $this;
     }
 
     /**
@@ -132,10 +119,14 @@ class Import
 
     /**
      * @param UploadedFile $file
+     *
+     * @return $this
      */
     public function setFile($file)
     {
         $this->file = $file;
+
+        return $this;
     }
 
     /**
@@ -148,9 +139,13 @@ class Import
 
     /**
      * @param ArrayCollection|Operation[] $operations
+     *
+     * @return $this
      */
     public function setOperations(ArrayCollection $operations)
     {
         $this->operations = $operations;
+
+        return $this;
     }
 }

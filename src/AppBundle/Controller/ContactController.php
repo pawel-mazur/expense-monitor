@@ -53,7 +53,7 @@ class ContactController extends Controller
      */
     public function newAction(Request $request)
     {
-        $form = $this->createForm(ContactType::class, null, ['user' => $this->getUser()]);
+        $form = $this->createForm(ContactType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -85,7 +85,7 @@ class ContactController extends Controller
      */
     public function editAction(Request $request, Contact $contact)
     {
-        $form = $this->createForm(ContactType::class, $contact, ['user' => $this->getUser()]);
+        $form = $this->createForm(ContactType::class, $contact);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

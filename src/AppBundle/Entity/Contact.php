@@ -16,6 +16,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class Contact
 {
+    use UserEntityTrait;
+
     /**
      * @ORM\Id
      * @ORM\Column(name="id", type="integer")
@@ -24,14 +26,6 @@ class Contact
      * @var int
      */
     protected $id;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
-     * @ORM\JoinColumn(name="id_user", nullable=false)
-     *
-     * @var User
-     */
-    protected $user;
 
     /**
      * @ORM\Column(name="name", type="text", nullable=false)
@@ -56,22 +50,6 @@ class Contact
     }
 
     /**
-     * @return User
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param User $user
-     */
-    public function setUser(User $user)
-    {
-        $this->user = $user;
-    }
-
-    /**
      * @return string
      */
     public function getName()
@@ -81,10 +59,14 @@ class Contact
 
     /**
      * @param string $name
+     *
+     * @return $this
      */
     public function setName($name)
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -97,9 +79,13 @@ class Contact
 
     /**
      * @param Operation[] $operations
+     *
+     * @return $this
      */
     public function setOperations($operations)
     {
         $this->operations = $operations;
+
+        return $this;
     }
 }

@@ -12,8 +12,6 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Date;
 
@@ -76,21 +74,6 @@ class OperationType extends AbstractType
                     'required' => true,
                 ]
             );
-
-        $builder->addEventListener(FormEvents::SUBMIT, [$this, 'postSubmit']);
-    }
-
-    /**
-     * @param FormEvent $event
-     */
-    public function postSubmit(FormEvent $event)
-    {
-        /** @var Operation $operation */
-        $operation = $event->getData();
-
-        $operation->setUser($event->getForm()->getConfig()->getOption('user'));
-        $operation->setStatus(Operation::STATUS_CORRECT);
-        $operation->setHash();
     }
 
     /**
@@ -102,9 +85,6 @@ class OperationType extends AbstractType
             'data_class' => Operation::class,
         ]);
 
-        $resolver->setRequired([
-            'user',
-            'data',
-        ]);
+        $resolver->setRequired('data');
     }
 }

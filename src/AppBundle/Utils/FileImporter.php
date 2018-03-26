@@ -100,7 +100,9 @@ class FileImporter
 
             if ($this->entityManager->getRepository(Operation::class)->findOneByHash($operation->getHash())) {
                 $operation->setStatus(Operation::STATUS_DUPLICATED);
-            } elseif (count($errors)) {
+            }
+
+            if (count($errors)) {
                 $operation->setStatus(Operation::STATUS_INVALID);
             }
 

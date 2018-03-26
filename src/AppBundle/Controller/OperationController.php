@@ -63,7 +63,7 @@ class OperationController extends Controller
      */
     public function newAction(Request $request)
     {
-        $form = $this->createForm(OperationType::class, new Operation(), ['user' => $this->getUser()]);
+        $form = $this->createForm(OperationType::class, new Operation());
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -94,7 +94,7 @@ class OperationController extends Controller
     public function editAction(Request $request, Operation $operation)
     {
         $deleteForm = $this->createDeleteForm($operation);
-        $editForm = $this->createForm(OperationType::class, $operation, ['user' => $this->getUser()]);
+        $editForm = $this->createForm(OperationType::class, $operation);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {

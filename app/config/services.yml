@@ -8,7 +8,12 @@ services:
         class: AppBundle\Form\ImportType
         arguments: ['@security.token_storage', '%import_dir%']
         tags:
-            - { name: form.type, alias: AppBundle\Form\ImportType }
+            - { name: form.type }
+    app.form.user_field_type_extension:
+        class: AppBundle\Form\UserFieldTypeExtension
+        autowire: true
+        tags:
+            - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
     app.util.file_importer:
         class: AppBundle\Utils\FileImporter
         arguments: ['@doctrine.orm.entity_manager', '@validator', '@security.token_storage', '%import_dir%']

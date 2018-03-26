@@ -2,18 +2,22 @@
 
 namespace AppBundle\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\OperationRepository")
  * @ORM\Table(name="operations")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Operation
 {
     const STATUS_CORRECT = 1;
     const STATUS_DUPLICATED = 2;
     const STATUS_INVALID = 3;
+
+    use UserEntityTrait;
 
     /**
      * @ORM\Id
@@ -25,16 +29,10 @@ class Operation
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
-     * @ORM\JoinColumn(name="id_user", nullable=false)
-     *
-     * @var User
-     */
-    protected $user;
-
-    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Contact", inversedBy="operations")
      * @ORM\JoinColumn(name="id_contact", nullable=false)
+     *
+     * @Assert\NotBlank()
      *
      * @var Contact
      */
@@ -54,7 +52,7 @@ class Operation
      * @Assert\Date()
      * @Assert\NotBlank()
      *
-     * @var \DateTime
+     * @var DateTime
      */
     protected $date;
 
@@ -77,10 +75,6 @@ class Operation
     protected $amount;
 
     /**
-     * @ORM\Column(name="status", type="integer", nullable=false)
-     *
-     * @Assert\NotBlank()
-     *
      * @var string
      */
     protected $status;
@@ -103,22 +97,6 @@ class Operation
     }
 
     /**
-     * @return User
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param User $user
-     */
-    public function setUser(User $user)
-    {
-        $this->user = $user;
-    }
-
-    /**
      * @return Contact
      */
     public function getContact()
@@ -128,10 +106,14 @@ class Operation
 
     /**
      * @param Contact $contact
+     *
+     * @return $this
      */
     public function setContact(Contact $contact)
     {
         $this->contact = $contact;
+
+        return $this;
     }
 
     /**
@@ -144,14 +126,18 @@ class Operation
 
     /**
      * @param Import $import
+     *
+     * @return $this
      */
     public function setImport(Import $import)
     {
         $this->import = $import;
+
+        return $this;
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getDate()
     {
@@ -159,11 +145,15 @@ class Operation
     }
 
     /**
-     * @param \DateTime $date
+     * @param DateTime $date
+     *
+     * @return $this
      */
-    public function setDate(\DateTime $date)
+    public function setDate(DateTime $date)
     {
         $this->date = $date;
+
+        return $this;
     }
 
     /**
@@ -176,10 +166,14 @@ class Operation
 
     /**
      * @param string $name
+     *
+     * @return $this
      */
     public function setName($name)
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -192,10 +186,14 @@ class Operation
 
     /**
      * @param float $amount
+     *
+     * @return $this
      */
     public function setAmount($amount)
     {
         $this->amount = $amount;
+
+        return $this;
     }
 
     /**
@@ -208,10 +206,14 @@ class Operation
 
     /**
      * @param string $status
+     *
+     * @return $this
      */
     public function setStatus($status)
     {
         $this->status = $status;
+
+        return $this;
     }
 
     /**
@@ -222,8 +224,15 @@ class Operation
         return $this->hash;
     }
 
+    /**
+     * @ORM\PostPersist()
+     *
+     * @return $this
+     */
     public function setHash()
     {
         $this->hash = hash('md5', sprintf('%s%s%s', $this->getDate()->format('Y-m-d'), $this->name, $this->amount));
+
+        return $this;
     }
 }
