@@ -14,8 +14,8 @@ localServer('local')
     ->env('console', 'bin/console');
 
 task('composer:install', function () {
-    run(env('bin/composer').' install');
-})->setPrivate();
+    run('{{bin/composer}} install');
+})->desc('Composer install');
 
 task('database:setup', function () {
     if (false === input()->getOption('force') && false === askConfirmation('Are you sure?')) throw new RuntimeException('');
@@ -29,6 +29,11 @@ task('database:update', function () {
     run('{{console}} doctrine:migration:migrate -n --env={{env}}');
     run('{{console}} doctrine:schema:update -n --env={{env}} --force');
 })->desc('Update database schema');
+
+task('load:fixtures', function (){
+    run('{{console}} doctrine:fixtures:load --no-interaction');
+})->desc('Load fixtures');
+after('database:setup', 'load:fixtures');
 
 task('assets:install', function () {
     run('{{console}} assets:install --env={{env}}');

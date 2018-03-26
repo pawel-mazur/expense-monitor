@@ -3,22 +3,18 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Import;
+use DateTime;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class ImportType extends AbstractType
 {
-    /**
-     * @var TokenStorage
-     */
-    private $tokenStorage;
-
     /**
      * @var string
      */
@@ -27,15 +23,17 @@ class ImportType extends AbstractType
     /**
      * ImportType constructor.
      *
-     * @param TokenStorage $tokenStorage
-     * @param string       $importDir
+     * @param string $importDir
      */
-    public function __construct(TokenStorage $tokenStorage, $importDir)
+    public function __construct($importDir)
     {
-        $this->tokenStorage = $tokenStorage;
         $this->importDir = $importDir;
     }
 
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array                $options
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -55,22 +53,36 @@ class ImportType extends AbstractType
                 ]
             );
 
+        $builder->addEventListener(FormEvents::SUBMIT, [$this, 'submit']);
         $builder->addEventListener(FormEvents::POST_SUBMIT, [$this, 'postSubmit']);
     }
 
+    /**
+     * @param FormEvent $event
+     */
+    public function submit(FormEvent $event)
+    {
+        /** @var Import $import */
+        $import = $event->getData();
+
+        $import->setDate(new DateTime());
+        $import->setName($import->getFile()->getClientOriginalName());
+    }
+
+    /**
+     * @param FormEvent $event
+     */
     public function postSubmit(FormEvent $event)
     {
         /** @var Import $import */
         $import = $event->getData();
 
-        $import->setUser($this->tokenStorage->getToken()->getUser());
-        $import->setDate(new \DateTime());
-
-        $fileName = md5(uniqid());
-        $import->getFile()->move($this->importDir, $fileName);
-        $import->setFileName($fileName);
+        $import->getFile()->move($this->importDir, $import->setHash()->getHash());
     }
 
+    /**
+     * @param OptionsResolver $resolver
+     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([

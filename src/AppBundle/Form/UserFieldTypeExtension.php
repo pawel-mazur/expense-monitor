@@ -32,13 +32,13 @@ class UserFieldTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->addEventListener(FormEvents::POST_SUBMIT, [$this, 'postSubmit']);
+        $builder->addEventListener(FormEvents::SUBMIT, [$this, 'submit']);
     }
 
     /**
      * @param FormEvent $event
      */
-    public function postSubmit(FormEvent $event)
+    public function submit(FormEvent $event)
     {
         /** @var UserEntityTrait $data */
         $data = $event->getData();

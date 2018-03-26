@@ -64,7 +64,7 @@ class FileImporter
 
     public function load(Import $import, $ignoreExisting)
     {
-        $handle = fopen(sprintf('%s/%s', $this->importDir, $import->getFileName()), 'r');
+        $handle = fopen(sprintf('%s/%s', $this->importDir, $import->getHash()), 'r');
 
         $first = true;
         while (false !== $data = fgetcsv($handle)) {

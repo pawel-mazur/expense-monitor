@@ -4,16 +4,19 @@ parameters:
 #    parameter_name: value
 
 services:
-    app.form.import_type:
-        class: AppBundle\Form\ImportType
-        arguments: ['@security.token_storage', '%import_dir%']
-        tags:
-            - { name: form.type }
-    app.form.user_field_type_extension:
-        class: AppBundle\Form\UserFieldTypeExtension
+    _defaults:
         autowire: true
-        tags:
-            - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
-    app.util.file_importer:
-        class: AppBundle\Utils\FileImporter
-        arguments: ['@doctrine.orm.entity_manager', '@validator', '@security.token_storage', '%import_dir%']
+        public: false
+
+    AppBundle\DataFixtures\UserFixtures:
+        tags: [doctrine.fixture.orm]
+
+    AppBundle\Form\ImportType:
+        arguments: { $importDir: '%import_dir%' }
+        tags: [name: form.type]
+    AppBundle\Form\UserFieldTypeExtension:
+        tags: [{ name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }]
+
+    AppBundle\Utils\FileImporter:
+        arguments: { $importDir: '%import_dir%' }
+        public: true

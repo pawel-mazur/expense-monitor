@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Import;
 use AppBundle\Form\ImportType;
+use AppBundle\Utils\FileImporter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -60,7 +61,7 @@ class ImportController extends Controller
      */
     public function importAction(Request $request, Import $import, $ignoreExisting = false)
     {
-        $importer = $this->get('app.util.file_importer');
+        $importer = $this->get(FileImporter::class);
 
         $form = $this->createFormBuilder()->add('submit', SubmitType::class, ['label' => 'form.import.label', 'attr' => ['class' => 'btn btn-success form-control']])->getForm();
         $form->handleRequest($request);

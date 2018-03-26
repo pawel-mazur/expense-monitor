@@ -9,7 +9,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ContactRepository")
  * @ORM\Table(name="contacts", uniqueConstraints={
- *     @UniqueConstraint(name="uniq_name", columns={"name"})
+ *     @UniqueConstraint(name="uniq_contact_name", columns={"name", "id_user"})
  * })
  *
  * @UniqueEntity("name")

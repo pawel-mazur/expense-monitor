@@ -5,12 +5,20 @@ namespace AppBundle\Entity;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\UniqueConstraint;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="imports")
+ * @ORM\Table(name="imports", uniqueConstraints={
+ *     @UniqueConstraint(name="uniq_import_name", columns={"name", "id_user"}),
+ *     @UniqueConstraint(name="uniq_import_hash", columns={"hash", "id_user"})
+ * })
+ * @ORM\HasLifecycleCallbacks()
+ *
+ * @UniqueEntity("name")
  */
 class Import
 {
@@ -35,15 +43,22 @@ class Import
     protected $date;
 
     /**
-     * @ORM\Column(name="file_name", type="string", nullable=false)
+     * @ORM\Column(name="name", type="string", nullable=false)
      *
      * @var string
      */
-    protected $fileName;
+    protected $name;
 
     /**
+     * @ORM\Column(name="hash", type="string", nullable=false)
+     *
+     * @var string
+     */
+    protected $hash;
+
+    /**
+     * @Assert\File(mimeTypes={"cvs"})
      * @Assert\NotBlank()
-     * @Assert\File()
      *
      * @var UploadedFile
      */
@@ -92,19 +107,39 @@ class Import
     /**
      * @return string
      */
-    public function getFileName()
+    public function getName()
     {
-        return $this->fileName;
+        return $this->name;
     }
 
     /**
-     * @param string $fileName
+     * @param string $name
      *
      * @return $this
      */
-    public function setFileName($fileName)
+    public function setName($name)
     {
-        $this->fileName = $fileName;
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash()
+    {
+        return $this->hash;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     *
+     * @return $this
+     */
+    public function setHash()
+    {
+        $this->hash = md5($this->getName());
 
         return $this;
     }
