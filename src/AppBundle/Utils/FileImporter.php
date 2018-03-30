@@ -117,7 +117,7 @@ class FileImporter
     public function import()
     {
         foreach ($this->getOperations() as $operation) {
-            if ($operation->getStatus() === Operation::STATUS_CORRECT) {
+            if (Operation::STATUS_CORRECT === $operation->getStatus()) {
                 if ($contact = $this->entityManager->getRepository(Contact::class)->findOneBy(['name' => $operation->getContact()->getName()])) {
                     $operation->setContact($contact);
                 } else {

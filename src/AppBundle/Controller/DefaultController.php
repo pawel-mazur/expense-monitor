@@ -26,11 +26,11 @@ class DefaultController extends Controller
         $operationRepository = $this->get('doctrine.orm.entity_manager')->getRepository(Operation::class);
 
         $date = new \DateTime();
-        if ($dateFrom === null) {
+        if (null === $dateFrom) {
             $dateFrom = new \DateTime($date->format('Y-m'));
         }
 
-        if ($dateTo === null) {
+        if (null === $dateTo) {
             $dateTo = clone $dateFrom;
             $dateTo->add(new \DateInterval('P1M'));
         }

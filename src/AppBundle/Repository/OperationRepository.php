@@ -69,19 +69,19 @@ class OperationRepository extends EntityRepository
 
         $qb->setParameter(':user', $user->getId());
 
-        if ($dateFrom !== null) {
+        if (null !== $dateFrom) {
             $qb
                 ->andWhere($qb->expr()->gt('operation.date', ':dateFrom'))
                 ->setParameter(':dateFrom', $dateFrom->format('Y-m-d'));
         }
 
-        if ($dateTo !== null) {
+        if (null !== $dateTo) {
             $qb
                 ->andWhere($qb->expr()->lt('operation.date', ':dateTo'))
                 ->setParameter(':dateTo', $dateTo->format('Y-m-d'));
         }
 
-        if ($contact !== null) {
+        if (null !== $contact) {
             $qb
                 ->andWhere($qb->expr()->eq('operation.id_contact', ':contact'))
                 ->setParameter(':contact', $contact->getId());

@@ -29,7 +29,7 @@
         "sensio/generator-bundle": "^3.0",
         "symfony/phpunit-bridge": "^3.0",
         "friendsofphp/php-cs-fixer": "^2.2",
-        "deployer/deployer": "^3.3",
+        "deployer/deployer": "^6.0.0",
         "doctrine/doctrine-fixtures-bundle": "^3.0"
     },
     "scripts": {
@@ -49,10 +49,7 @@
         ]
     },
     "config": {
-        "bin-dir": "bin",
-        "platform": {
-            "php": "5.5.9"
-        }
+        "bin-dir": "bin"
     },
     "extra": {
         "symfony-app-dir": "app",
