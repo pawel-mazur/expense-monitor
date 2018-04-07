@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Validator\ImportFile;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -57,8 +58,8 @@ class Import
     protected $hash;
 
     /**
-     * @Assert\File(mimeTypes={"cvs"})
      * @Assert\NotBlank()
+     * @ImportFile()
      *
      * @var UploadedFile
      */

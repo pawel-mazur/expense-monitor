@@ -21,7 +21,7 @@
             <tbody>
             {% for import in imports %}
                 <tr>
-                    <td>{{ import.date | date('Y-m-d') }}</td>
+                    <td>{{ import.date | date('Y-m-d H:i') }}</td>
                     <td><a href="{{ path('import_import', {import: import.id, ignoreExisting: 'ignore'}) }}">{{ import.name }}</a></td>
                 </tr>
             {% endfor %}

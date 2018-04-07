@@ -8,7 +8,6 @@ use AppBundle\Utils\FileImporter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -63,7 +62,7 @@ class ImportController extends Controller
     {
         $importer = $this->get(FileImporter::class);
 
-        $form = $this->createFormBuilder()->add('submit', SubmitType::class, ['label' => 'form.import.label', 'attr' => ['class' => 'btn btn-success form-control']])->getForm();
+        $form = $this->createFormBuilder()->getForm();
         $form->handleRequest($request);
 
         $importer->load($import, $ignoreExisting);
