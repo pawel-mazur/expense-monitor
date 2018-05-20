@@ -11,7 +11,7 @@ WRITABLE_DIRS = var/cache var/logs var/sessions var/imports
 
 # IMAGE
 
-build: env up npm composer setfacl cs-fix
+build: env up npm composer cs-fix
 	$(DOCKER_COMPOSE) build web
 
 push:

@@ -12,31 +12,35 @@
 
     <div class="table-responsive">
         <table class="table table-bordered">
-            {% set date = null %}
+            <thead>
+                <tr class="active">
+                    <th>{{ 'model._common.date' | trans }}</th>
+                    <th>{{ 'model.contact._title' | trans }}</th>
+                    <th>{{ 'model.operation._title' | trans }}</th>
+                    <th>{{ 'model.operation.amount' | trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
             {% for operation in importer.operations %}
-
-                {% if loop.first or date != operation.date %}
-                    {% set date = operation.date %}
-                    <tr class="active">
-                        <th colspan="3">{{ operation.date | date('d.m.Y') }}</th>
-                    </tr>
-                {% elseif date is null %}
-                    <tr class="active">
-                        <th colspan="3">{{ 'import.date.abnormal' | trans }}</th>
-                    </tr>
-                {% endif %}
                 <tr class="
                     {% if operation.status == constant('AppBundle\\Entity\\Operation::STATUS_CORRECT') %}success
                     {% elseif operation.status == constant('AppBundle\\Entity\\Operation::STATUS_DUPLICATED') %}warning
                     {% elseif operation.status == constant('AppBundle\\Entity\\Operation::STATUS_INVALID') %}danger
                     {% endif %}
                 ">
+                    <td>
+                        {% if operation.date is not null %}
+                            {{ operation.date | date('d.m.Y') }}
+                        {% else %}
+                            {{ 'import.date.abnormal' | trans }}
+                        {% endif %}
+                    </td>
                     <td>{{ operation.contact.name }}</td>
                     <td>{{ operation.name }}</td>
                     <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                 </tr>
-
             {% endfor %}
+            </tbody>
         </table>
     </div>
 
@@ -50,3 +54,21 @@
 
 {% endblock %}
 
+{% block javascripts %}
+
+    <script>
+
+        $(document).ready( function () {
+            $('.table').DataTable({
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Polish.json"
+                },
+                rowGroup: {
+                    dataSrc: 0
+                }
+            });
+        });
+
+    </script>
+
+{% endblock %}

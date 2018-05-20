@@ -94,7 +94,7 @@
                     <div class="text-center">
                         <div id="groups-expenses-chart"></div>
                     </div>
-                    <div class="table-responsive" style="height: 400px;">
+                    <div class="table-responsive" style="height: 470px;">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -132,7 +132,7 @@
                     <div class="text-center">
                         <div id="groups-incomes-chart"></div>
                     </div>
-                    <div class="table-responsive" style="height: 400px;">
+                    <div class="table-responsive" style="height: 470px;">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -187,6 +187,17 @@
 {% block javascripts %}
 
     <script>
+
+        $(document).ready( function () {
+            $('.table').DataTable({
+                lengthChange: false,
+                ordering: false,
+                searching: false,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Polish.json"
+                }
+            });
+        });
 
         function format_date(date){
             var y = date.getFullYear(),
