@@ -17,6 +17,10 @@ services:
     AppBundle\Form\UserFieldTypeExtension:
         tags: [{ name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }]
 
+    AppBundle\Utils\AppExtension:
+        arguments: { $repository: '%app.repository%', $version: '%app.version%' }
+        tags: [name: twig.extension]
+
     AppBundle\Utils\FileImporter:
         arguments: { $importDir: '%import_dir%' }
         public: true

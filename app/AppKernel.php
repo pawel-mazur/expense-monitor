@@ -1,9 +1,11 @@
 <?php
 
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
-class AppKernel extends Kernel
+class AppKernel extends Kernel implements CompilerPassInterface
 {
     public function registerBundles()
     {
@@ -49,5 +51,14 @@ class AppKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         $loader->load($this->getRootDir().'/config/config_'.$this->getEnvironment().'.yml');
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     */
+    public function process(ContainerBuilder $container)
+    {
+        $container->setParameter('app.repository', $container->getParameter('app_repository'));
+        $container->setParameter('app.version', exec('git rev-parse --short HEAD'));
     }
 }

@@ -88,7 +88,7 @@
             {% block footer %}
             <div class="panel panel-default">
                 <div class="panel-body">
-                    &copy; {{ "now" | date('Y') }} {{ 'app.title' | trans }}
+                    &copy; {{ "now" | date('Y') }} <a href="{{ app_repository_link }}">{{ 'app.title' | trans }}</a> (<a href="{{ app_version_link }}">{{ app_version }}</a>)
                 </div>
             </div>
             {% endblock %}
