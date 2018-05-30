@@ -39,7 +39,7 @@ class ContactRepository extends EntityRepository
 
         $qb->select('contact', 'operations');
 
-        $qb->innerJoin('contact.operations', 'operations');
+        $qb->leftJoin('contact.operations', 'operations');
 
         return $qb;
     }

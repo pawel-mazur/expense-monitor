@@ -6,11 +6,16 @@ parameters:
 services:
     _defaults:
         autowire: true
+        autoconfigure: true
         public: false
 
-    AppBundle\DataFixtures\UserFixtures:
+    AppBundle\DataFixtures\:
+        resource: '../../src/AppBundle/DataFixtures/*'
         tags: [doctrine.fixture.orm]
 
+    AppBundle\Form\:
+        resource: '../../src/AppBundle/Form/*'
+        tags: [name: form.type]
     AppBundle\Form\ImportType:
         arguments: { $importDir: '%import_dir%' }
         tags: [name: form.type]

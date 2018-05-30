@@ -7,6 +7,7 @@
             <thead>
                 <tr class="active">
                     <th>{{ 'model._common.name' | trans }}</th>
+                    <th>{{ 'model.tag._title_plural' | trans }}</th>
                     <th>{{ 'model.operation._title_plural' | trans }}</th>
                 </tr>
             </thead>
@@ -14,6 +15,12 @@
             {% for contact in contacts %}
                 <tr>
                     <td><a href="{{ path('contact_edit', {'contact': contact.id}) }}">{{ contact.name }}</a></td>
+                    <td>
+                        {% for tag in contact.tags %}
+                            <a href="{{ path('tag_edit', {tag: tag.id}) }}">{{ tag.name }}</a>
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
                     <td><a href="{{ path('operation_index', {'contact': contact.id}) }}">{{ contact.operations.count }}</a></td>
                 </tr>
             {% endfor %}

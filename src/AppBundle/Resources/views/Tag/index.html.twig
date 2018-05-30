@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+            <tr class="active">
+                <th>{{ 'model._common.name' | trans }}</th>
+                <th>{{ 'model.contact._title_plural' | trans }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tag in tags %}
+                <tr>
+                    <td><a href="{{ path('tag_edit', {'tag': tag.id}) }}">{{ tag.name }}</a></td>
+                    <td>
+                        {% for contact in tag.contacts %}
+                            <a href="{{ path('contact_edit', {contact: contact.id}) }}">{{ contact.name }}</a>
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

@@ -21,6 +21,8 @@ class UserFixtures extends Fixture
         $user->setPlainPassword('user');
         $user->setEnabled(true);
 
+        $this->setReference('user', $user);
+
         $manager->persist($user);
         $manager->flush();
     }

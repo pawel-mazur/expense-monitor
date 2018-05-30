@@ -10,14 +10,14 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * @ORM\Entity(repositoryClass="AppBundle\Repository\ContactRepository")
- * @ORM\Table(name="contacts", uniqueConstraints={
- *     @UniqueConstraint(name="uniq_contact_name", columns={"name", "id_user"})
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\TagRepository")
+ * @ORM\Table(name="tags", uniqueConstraints={
+ *     @UniqueConstraint(name="uniq_tag_name", columns={"name", "id_user"})
  * })
  *
- * @UniqueEntity("name")
+ * @UniqueEntity(fields={"name", "user"})
  */
-class Contact
+class Tag
 {
     use UserEntityTrait;
 
@@ -38,23 +38,16 @@ class Contact
     protected $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Operation", mappedBy="contact")
-     *
-     * @var Operation[]
-     */
-    protected $operations;
-
-    /**
-     * @ManyToMany(targetEntity="AppBundle\Entity\Tag", inversedBy="contacts", cascade={"all"})
+     * @ManyToMany(targetEntity="AppBundle\Entity\Contact", mappedBy="tags", cascade={"all"})
      * @JoinTable(name="contacts_tags")
      *
-     * @var Tag[]|ArrayCollection
+     * @var Contact[]|ArrayCollection
      */
-    protected $tags;
+    protected $contacts;
 
     public function __construct()
     {
-        $this->tags = new ArrayCollection();
+        $this->contacts = new ArrayCollection();
     }
 
     /**
@@ -86,71 +79,55 @@ class Contact
     }
 
     /**
-     * @return Operation[]
+     * @return Contact[]
      */
-    public function getOperations()
+    public function getContacts()
     {
-        return $this->operations;
+        return $this->contacts;
     }
 
     /**
-     * @param Operation[] $operations
+     * @param Contact[] $contacts
      *
      * @return $this
      */
-    public function setOperations($operations)
+    public function setContacts($contacts)
     {
-        $this->operations = $operations;
+        $this->contacts = $contacts;
 
         return $this;
     }
 
     /**
-     * @return Tag[]|ArrayCollection
-     */
-    public function getTags()
-    {
-        return $this->tags;
-    }
-
-    /**
-     * @param mixed $tags
-     */
-    public function setTags($tags)
-    {
-        $this->tags = $tags;
-    }
-
-    /**
-     * @param Tag $tag
+     * @param Contact $contact
      *
      * @return $this
      */
-    public function addTag(Tag $tag)
+    public function addContact(Contact $contact)
     {
-        if ($this->tags->contains($tag)) {
+        if ($this->contacts->contains($contact)) {
             return $this;
         }
 
-        $this->tags->add($tag);
-        $tag->addContact($this);
+        $this->contacts->add($contact);
+        $contact->addTag($this);
 
         return $this;
     }
 
     /**
-     * @param Tag $tag
+     * @param Contact $contact
      *
      * @return $this
      */
-    public function removeTag(Tag $tag)
+    public function removeContact(Contact $contact)
     {
-        if (false === $this->tags->contains($tag)) {
+        if (false === $this->contacts->contains($contact)) {
             return $this;
         }
 
-        $this->tags->removeElement($tag);
-        $tag->removeContact($this);
+        $this->contacts->removeElement($contact);
+        $contact->removeTag($this);
 
         return $this;
     }

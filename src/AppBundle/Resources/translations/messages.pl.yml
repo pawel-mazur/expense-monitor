@@ -63,6 +63,9 @@ menu:
   operation:
     list: 'Lista operatcji'
     add: 'Dodaj operacje'
+  tag:
+    list: 'Lista tagów'
+    add: 'Dodaj tag'
 
 model:
   _common:
@@ -75,6 +78,9 @@ model:
   import:
     _title: 'Import'
     file: 'Plik'
+  tag:
+    _title: 'Tag'
+    _title_plural: 'Tagi'
   operation:
     _title: 'Operacja'
     _title_plural: 'Operacje'

@@ -58,7 +58,7 @@ class AppKernel extends Kernel implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        $container->setParameter('app.repository', $container->getParameter('app_repository'));
+        $container->setParameter('app.repository', 'https://github.com/pawel-mazur/spending-monitor');
         $container->setParameter('app.version', exec('git rev-parse --short HEAD'));
     }
 }

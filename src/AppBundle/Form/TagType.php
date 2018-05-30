@@ -4,26 +4,20 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\Contact;
 use AppBundle\Entity\Tag;
-use AppBundle\Repository\TagRepository;
+use AppBundle\Repository\ContactRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class ContactType extends AbstractType
+class TagType extends AbstractType
 {
     /**
      * @var TokenStorageInterface
      */
     private $tokenStorage;
 
-    /**
-     * ContactType constructor.
-     *
-     * @param TokenStorageInterface $tokenStorage
-     */
     public function __construct(TokenStorageInterface $tokenStorage)
     {
         $this->tokenStorage = $tokenStorage;
@@ -38,28 +32,24 @@ class ContactType extends AbstractType
 
         $builder
             ->add(
-                'name',
-                TextType::class,
-                [
-                    'label' => 'model._common.name',
-                    'required' => true,
-                ]
+                'name'
             )
             ->add(
-                'tags',
+                'contacts',
                 EntityType::class,
                 [
-                    'label' => 'model.tag._title_plural',
+                    'label' => 'model.contact._title_plural',
                     'choice_label' => 'name',
-                    'class' => Tag::class,
-                    'query_builder' => function (TagRepository $repository) use ($user) {
-                        return $repository->createQB($user);
+                    'class' => Contact::class,
+                    'query_builder' => function (ContactRepository $repository) use ($user) {
+                        return $repository->createContactQB($user);
                     },
+                    'by_reference' => false,
                     'required' => false,
                     'multiple' => true,
-                    'mapped' => true,
                 ]
-            );
+            )
+        ;
     }
 
     /**
@@ -68,7 +58,7 @@ class ContactType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Contact::class,
+            'data_class' => Tag::class,
         ]);
     }
 }

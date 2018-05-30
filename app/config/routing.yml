@@ -1,3 +1,7 @@
+app_tag:
+    resource: "@AppBundle/Controller/TagController.php"
+    type:     annotation
+
 fos_user_security:
     resource: "@FOSUserBundle/Resources/config/routing/all.xml"
 
