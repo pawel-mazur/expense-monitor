@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Class ContactController.
  *
- * @Route("/contractor")
+ * @Route("/contact")
  */
 class ContactController extends Controller
 {

@@ -1,0 +1,15 @@
+cache:
+  directories:
+    - node-modules
+    - web/vendor
+    - vendor
+
+install:
+  - make env
+  - docker-compose run npm
+  - docker-compose run composer install --no-interaction
+  - make database-init fixtures
+
+script:
+  - make cs-fix
+  - make test

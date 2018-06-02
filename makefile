@@ -1,27 +1,30 @@
-DOCKER_COMPOSE != which docker-compose
+
+WRITABLE_DIRS = var/cache var/logs var/sessions var/imports
+
+ifeq ($(shell docker-compose -v 2>/dev/null),)
+CONSOLE ?= bin/console
+else
+DOCKER_COMPOSE = docker-compose
 RUN = $(DOCKER_COMPOSE) run --rm
 EXEC = $(DOCKER_COMPOSE) exec
 USER != echo `id -u`:`id -g`
 
-BASH = $(if $(DOCKER_COMPOSE), $(EXEC) web,)
-CONSOLE ?= $(BASH) bin/console
-
-WRITABLE_DIRS = var/cache var/logs var/sessions var/imports
-
+BASH ?= $(EXEC) web
+CONSOLE ?= $(RUN) web bin/console
 
 # IMAGE
 
-build: env up npm composer cs-fix
+build: env npm composer cs-fix
 	$(DOCKER_COMPOSE) build web
 
 push:
 	docker push pakumaz/spending-monitor
 
-up:
-	$(DOCKER_COMPOSE) up -d web
-
 env:
 	cp --no-clobber .env.dist .env
+
+up:
+	$(DOCKER_COMPOSE) up -d web
 
 bash: up
 	$(EXEC) web /bin/bash
@@ -30,10 +33,13 @@ npm:
 	$(RUN) -u $(USER) npm
 
 composer:
-	$(RUN) -u $(USER) composer
+	$(RUN) -u $(USER) composer install --no-interaction
 
 cs-fix:
 	$(RUN) web bin/php-cs-fixer fix
+
+test:
+	$(RUN) web bin/phpunit
 
 setfacl:
 	setfacl -RL -m u:www-data:rwX -m u:`whoami`:rwX $(WRITABLE_DIRS)
@@ -41,6 +47,8 @@ setfacl:
 
 clean:
 	$(RUN) web rm -rf node_modules vendor var/cache/* var/logs/* var/sessions/* web/vendor
+
+endif
 
 
 # APP

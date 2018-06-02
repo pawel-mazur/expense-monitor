@@ -1,6 +1,8 @@
 Monitor Wydatków
 ========================
 
+[![Build Status](https://travis-ci.org/pawel-mazur/spending-monitor.png)](https://travis-ci.org/pawel-mazur/spending-monitor)
+
 Aplikacja przeznaczona do monitorowania domowego budżetu, 
 której zadaniem jest proste importowanie danych oraz wizualizacja
 poniesionych kosztów z uwzględnieniem podziału na poszczególne
