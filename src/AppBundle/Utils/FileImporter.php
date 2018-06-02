@@ -6,7 +6,7 @@ use AppBundle\Entity\Contact;
 use AppBundle\Entity\Import;
 use AppBundle\Entity\Operation;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\EntityManager;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Validator\Constraints\Date;
@@ -16,9 +16,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class FileImporter
 {
     /**
-     * @var EntityManager
+     * @var ManagerRegistry
      */
-    private $entityManager;
+    private $managerRegistry;
 
     /**
      * @var ValidatorInterface
@@ -53,15 +53,15 @@ class FileImporter
     /**
      * FileImporter constructor.
      *
-     * @param EntityManager         $entityManager
+     * @param ManagerRegistry       $managerRegistry
      * @param ValidatorInterface    $validator
      * @param TokenStorageInterface $tokenStorage
      * @param Stopwatch             $stopwatch
      * @param $importDir
      */
-    public function __construct(EntityManager $entityManager, ValidatorInterface $validator, TokenStorageInterface $tokenStorage, Stopwatch $stopwatch, $importDir)
+    public function __construct(ManagerRegistry $managerRegistry, ValidatorInterface $validator, TokenStorageInterface $tokenStorage, Stopwatch $stopwatch, $importDir)
     {
-        $this->entityManager = $entityManager;
+        $this->managerRegistry = $managerRegistry;
         $this->validator = $validator;
         $this->tokenStorage = $tokenStorage;
         $this->stopwatch = $stopwatch;
@@ -77,7 +77,7 @@ class FileImporter
         $handle = fopen(sprintf('%s/%s', $this->importDir, $import->getHash()), 'r');
 
         $user = $this->tokenStorage->getToken()->getUser();
-        $operations = $this->entityManager->getRepository(Operation::class)->getOperationsQB($user)
+        $operations = $this->managerRegistry->getRepository(Operation::class)->getOperationsQB($user)
             ->indexBy('operation', 'operation.hash')
             ->getQuery()
             ->getResult();
@@ -137,7 +137,7 @@ class FileImporter
         $this->stopwatch->start('import');
 
         $user = $this->tokenStorage->getToken()->getUser();
-        $contacts = $this->entityManager->getRepository(Contact::class)->createContactQB($user)
+        $contacts = $this->managerRegistry->getRepository(Contact::class)->createContactQB($user)
             ->indexBy('contact', 'contact.name')
             ->getQuery()
             ->getResult();
@@ -148,14 +148,14 @@ class FileImporter
                     $operation->setContact($contact);
                 } else {
                     $contacts[$operation->getContact()->getName()] = $operation->getContact();
-                    $this->entityManager->persist($operation->getContact());
+                    $this->managerRegistry->persist($operation->getContact());
                 }
 
-                $this->entityManager->persist($operation);
+                $this->managerRegistry->persist($operation);
             }
         }
 
-        $this->entityManager->flush();
+        $this->managerRegistry->flush();
 
         $this->stopwatch->stop('import');
     }

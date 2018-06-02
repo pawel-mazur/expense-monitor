@@ -1,6 +1,6 @@
-FROM php:7.0-apache
+FROM php:7.2-apache
 
-RUN apt-get update && apt-get install -y libpq-dev && \
+RUN apt-get update && apt-get install -y libpq-dev git && \
     pecl install xdebug
 
 RUN docker-php-ext-install pdo_pgsql && \

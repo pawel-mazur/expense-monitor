@@ -20,7 +20,7 @@ class TagController extends Controller
     /**
      * Lists all tag entities.
      *
-     * @Route("/", name="tag_index")
+     * @Route("", name="tag_index")
      * @Method("GET")
      * @Template()
      */
