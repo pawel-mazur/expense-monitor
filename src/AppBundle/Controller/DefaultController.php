@@ -4,6 +4,8 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Operation;
 use AppBundle\Repository\OperationRepository;
+use DateInterval;
+use DateTime;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -15,24 +17,24 @@ class DefaultController extends Controller
      * @Route("/{dateFrom}/{dateTo}", name="homepage")
      * @Template()
      *
-     * @param \DateTime $dateFrom
-     * @param \DateTime $dateTo
+     * @param DateTime $dateFrom
+     * @param DateTime $dateTo
      *
      * @return array|RedirectResponse
      */
-    public function indexAction(\DateTime $dateFrom = null, \DateTime $dateTo = null)
+    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null)
     {
         /** @var OperationRepository $operationRepository */
         $operationRepository = $this->get('doctrine.orm.entity_manager')->getRepository(Operation::class);
 
-        $date = new \DateTime();
+        $date = new DateTime();
         if (null === $dateFrom) {
-            $dateFrom = new \DateTime($date->format('Y-m'));
+            $dateFrom = new DateTime($date->format('Y-m'));
         }
 
         if (null === $dateTo) {
             $dateTo = clone $dateFrom;
-            $dateTo->add(new \DateInterval('P1M'));
+            $dateTo->add(new DateInterval('P1M'));
         }
 
         $datePrevFrom = clone $dateFrom;
@@ -56,10 +58,17 @@ class DefaultController extends Controller
         ];
 
         $operations = [
-            'all' => $operationRepository->getOperationsSumGroupByDate($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
-            'expenses' => $operationRepository->getOperationsSumGroupByContactExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
-            'incomes' => $operationRepository->getOperationsSumGroupByContactIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+            'contact' => [
+                'expenses' => $operationRepository->getOperationsSumGroupByContactExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+                'incomes' => $operationRepository->getOperationsSumGroupByContactIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+            ],
+            'tag' => [
+                'expenses' => $operationRepository->getOperationsSumGroupByTagExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+                'incomes' => $operationRepository->getOperationsSumGroupByTagIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+            ],
         ];
+
+        $timeLine = $operationRepository->getOperationsTimeLineGroupByDateQB($this->getUser(), $dateFrom, $dateTo);
 
         return [
             'dateFrom' => $dateFrom,
@@ -67,6 +76,7 @@ class DefaultController extends Controller
             'dates' => $dates,
             'statistics' => $statistics,
             'operations' => $operations,
+            'timeLine' => $timeLine,
         ];
     }
 }

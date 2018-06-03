@@ -21,10 +21,7 @@ class TagFixtures extends Fixture implements DependentFixtureInterface
             $tag->setName($data);
             $tag->setUser($this->getReference('user'));
 
-            $w1 = rand(0, ContactFixtures::ROWS);
-            $w2 = rand(0, ContactFixtures::ROWS);
-
-            foreach (range(min($w1, $w2), max($w1, $w2), abs($w1 - $w2)) as $contact) {
+            foreach (range(0, ContactFixtures::ROWS, rand(1, ContactFixtures::ROWS)) as $contact) {
                 $tag->addContact($this->getReference(sprintf('%s.%d', ContactFixtures::PREFIX, $contact)));
             }
 
@@ -34,6 +31,9 @@ class TagFixtures extends Fixture implements DependentFixtureInterface
         $manager->flush();
     }
 
+    /**
+     * @return array
+     */
     public function getData()
     {
         return [

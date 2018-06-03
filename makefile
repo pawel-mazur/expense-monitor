@@ -1,4 +1,3 @@
-
 WRITABLE_DIRS = var/cache var/logs var/sessions var/imports
 
 ifeq ($(shell docker-compose -v 2>/dev/null),)
@@ -28,6 +27,9 @@ up:
 
 bash: up
 	$(EXEC) web /bin/bash
+
+database: up
+	$(EXEC) database psql -U spendingmonitor spendingmonitor
 
 npm:
 	$(RUN) -u $(USER) npm
@@ -70,6 +72,7 @@ database-init:
 	$(CONSOLE) doctrine:database:drop --force --if-exists
 	$(CONSOLE) doctrine:database:create
 	$(CONSOLE) doctrine:schema:create
+	$(CONSOLE) doctrine:migrations:version --no-interaction --add --all
 
 database-update:
 	$(CONSOLE) doctrine:migration:migrate --no-interaction --allow-no-migration

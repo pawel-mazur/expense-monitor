@@ -11,7 +11,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 class OperationFixtures extends Fixture implements DependentFixtureInterface
 {
-    const ROWS = 1000;
+    const ROWS = 100;
     const MIN_AMOUNT = -1000;
     const MAX_AMOUNT = 1000;
 
@@ -32,7 +32,6 @@ class OperationFixtures extends Fixture implements DependentFixtureInterface
             $operation->setDate((new DateTime())->setTimestamp(rand($start->getTimestamp(), $end->getTimestamp())));
             $operation->setContact($this->getReference(sprintf('%s.%d', ContactFixtures::PREFIX, rand(0, ContactFixtures::ROWS))));
             $operation->setUser($this->getReference('user'));
-            $operation->setHash();
 
             $manager->persist($operation);
         }

@@ -5,6 +5,7 @@ namespace AppBundle\Utils;
 use AppBundle\Entity\Contact;
 use AppBundle\Entity\Import;
 use AppBundle\Entity\Operation;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -100,9 +101,9 @@ class FileImporter
             $errors = $this->validator->validate($data[1], new Date());
 
             if (false == count($errors)) {
-                $operation->setDate(new \DateTime($data[1]));
+                $operation->setDate(new DateTime($data[1]));
             } else {
-                $operation->setDate(new \DateTime());
+                $operation->setDate(new DateTime());
             }
 
             $operation->setStatus(Operation::STATUS_CORRECT);
@@ -148,14 +149,14 @@ class FileImporter
                     $operation->setContact($contact);
                 } else {
                     $contacts[$operation->getContact()->getName()] = $operation->getContact();
-                    $this->managerRegistry->persist($operation->getContact());
+                    $this->managerRegistry->getManager()->persist($operation->getContact());
                 }
 
-                $this->managerRegistry->persist($operation);
+                $this->managerRegistry->getManager()->persist($operation);
             }
         }
 
-        $this->managerRegistry->flush();
+        $this->managerRegistry->getManager()->flush();
 
         $this->stopwatch->stop('import');
     }

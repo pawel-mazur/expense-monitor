@@ -17,8 +17,7 @@
                     <td><a href="{{ path('contact_edit', {'contact': contact.id}) }}">{{ contact.name }}</a></td>
                     <td>
                         {% for tag in contact.tags %}
-                            <a href="{{ path('tag_edit', {tag: tag.id}) }}">{{ tag.name }}</a>
-                            {% if not loop.last %}, {% endif %}
+                            <a href="{{ path('tag_edit', {tag: tag.id}) }}">{{ tag.name }}</a>{% if not loop.last %}, {% endif %}
                         {% endfor %}
                     </td>
                     <td><a href="{{ path('operation_index', {'contact': contact.id}) }}">{{ contact.operations.count }}</a></td>

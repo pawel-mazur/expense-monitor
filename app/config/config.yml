@@ -18,7 +18,7 @@ framework:
     form:            ~
     csrf_protection: ~
     validation:      { enable_annotations: true }
-    #serializer:      { enable_annotations: true }
+    serializer:      { enable_annotations: true }
     templating:
         engines: ['twig']
     default_locale:  "%locale%"
@@ -79,3 +79,7 @@ fos_user:
         confirmation:
             enabled: false
     user_class: AppBundle\Entity\User
+
+# FOS Rest Configuration
+fos_rest:
+    param_fetcher_listener: force

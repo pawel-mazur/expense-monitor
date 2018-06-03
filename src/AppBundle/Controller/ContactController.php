@@ -85,6 +85,7 @@ class ContactController extends Controller
      */
     public function editAction(Request $request, Contact $contact)
     {
+        $deleteForm = $this->createDeleteForm($contact);
         $form = $this->createForm(ContactType::class, $contact);
         $form->handleRequest($request);
 
@@ -99,7 +100,50 @@ class ContactController extends Controller
         }
 
         return [
+            'contact' => $contact,
             'form' => $form->createView(),
+            'delete_form' => $deleteForm->createView(),
         ];
+    }
+
+    /**
+     * Deletes a tag entity.
+     *
+     * @Route("/{contact}", name="contact_delete")
+     * @Method("DELETE")
+     *
+     * @param Request $request
+     * @param Contact $contact
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function deleteAction(Request $request, Contact $contact)
+    {
+        $form = $this->createDeleteForm($contact);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($contact);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('contact_index');
+    }
+
+    /**
+     * Creates a form to delete a tag entity.
+     *
+     * @param Contact $contact The contact entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm(Contact $contact)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('contact_delete', array('contact' => $contact->getId())))
+            ->setMethod('DELETE')
+            ->getForm()
+            ;
     }
 }

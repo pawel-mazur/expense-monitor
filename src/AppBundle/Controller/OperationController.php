@@ -4,7 +4,10 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Contact;
 use AppBundle\Entity\Operation;
+use AppBundle\Entity\Tag;
 use AppBundle\Form\OperationType;
+use DateTime;
+use FOS\RestBundle\Controller\Annotations\QueryParam;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -23,26 +26,35 @@ class OperationController extends Controller
     /**
      * Lists all operation entities.
      *
-     * @Route("/{contact}", name="operation_index", requirements={"contact"="\d+"})
+     * @Route("", name="operation_index")
      * @Method("GET")
      * @Template()
      *
+     * @QueryParam(name="dateFrom", nullable=true)
+     * @QueryParam(name="dateTo", nullable=true)
+     * @QueryParam(name="contact", nullable=true, requirements="\d+")
+     * @QueryParam(name="tag", nullable=true, requirements="\d+")
+     *
+     * @param DateTime     $dateFrom
+     * @param DateTime     $dateTo
      * @param Contact|null $contact
+     * @param Tag|null     $tag
      *
      * @return array
      */
-    public function indexAction(Contact $contact = null)
+    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null, Tag $tag = null)
     {
         $em = $this->getDoctrine()->getManager();
         $operationRepository = $em->getRepository(Operation::class);
 
         $operations = $operationRepository
-            ->getOperationsByContactQB($this->getUser(), $contact)
+            ->getOperationsByContactTagQB($this->getUser(), $dateFrom, $dateTo, $contact, $tag)
             ->orderBy('operation.date', 'DESC')
+            ->addOrderBy('tag.name')
             ->getQuery()
             ->getResult();
 
-        $statistics = $operationRepository->getOperationsSumQB($this->getUser(), null, null, $contact)->execute()->fetch();
+        $statistics = $operationRepository->getOperationsSumQB($this->getUser(), $dateFrom, $dateTo, $contact, $tag)->execute()->fetch();
 
         return [
             'operations' => $operations,
@@ -70,6 +82,8 @@ class OperationController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->persist($form->getData());
             $em->flush();
+
+            $this->addFlash('success', $this->get('translator')->trans('form.new.flash'));
 
             return $this->redirectToRoute('operation_edit', ['operation' => $form->getData()->getId()]);
         }

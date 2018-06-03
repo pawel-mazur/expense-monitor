@@ -1,39 +1,99 @@
 {% extends '::base.html.twig' %}
 
+{% import _self as macro %}
+
+{% macro panel(style, icon, header, body) %}
+
+    <div class="panel panel-{{ style }}">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <i class="glyphicon glyphicon-{{ icon }}"></i>
+                {{ header | trans }}
+            </h3>
+        </div>
+        <div class="panel-body text-center">
+            {{ body | number_format(2, ',', ' ') }} zł
+        </div>
+    </div>
+
+{% endmacro %}
+
+{% macro chart(context, header, id, type, col, data) %}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <i class="glyphicon glyphicon-tasks"></i>
+                {{ header | trans }}
+            </h3>
+        </div>
+        <div class="panel-body">
+            {% if data is not empty %}
+                <div class="text-center">
+                    <div id="{{ id }}"></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>{{ col | trans }}</th>
+                            <th>{{ 'model.operation.amount' | trans }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in data %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('operation_index', {(type): group.id, dateFrom: context.dateFrom | date('Y-m-d'), dateTo: context.dateTo | date('Y-m-d')}) }}">
+                                        {% if group.name is not null %}
+                                            {{ group.name }}
+                                        {% else %}
+                                            {{ 'model._common.other' | trans }}
+                                        {% endif %}
+                                    </a>
+                                </td>
+                                <td class="text-right">{{ group.amount | number_format(2,'.','') }}&nbsp;zł</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endmacro %}
+
+{% macro donut(element, data) %}
+
+    new Morris.Donut({
+        element: '{{ element }}',
+        formatter: function (y, data) {
+            return y + ' zł';
+        },
+        data: [
+        {% for group in data | slice(0, 10) %}
+            { label: '{{ group.name }}', value: '{{ group.amount | number_format(2,'.','') }}'}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]});
+
+{% endmacro %}
+
 {% block body %}
 
     <div class="row">
 
         <div class="col-xs-6 col-md-4">
 
-            <div class="panel panel-success">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <i class="glyphicon glyphicon-chevron-down"></i>
-                        {{ 'header.incomes' | trans }}
-                    </h3>
-                </div>
-                <div class="panel-body text-center">
-                    {{ statistics.incomes.sum | number_format(2, ',', ' ') }} zł
-                </div>
-            </div>
+            {{ macro.panel('danger', 'chevron-up', 'header.expenses', statistics.expenses.sum) }}
 
         </div>
 
-
         <div class="col-xs-6 col-md-4">
 
-            <div class="panel panel-danger">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <i class="glyphicon glyphicon-chevron-up"></i>
-                        {{ 'header.expenses' | trans }}
-                    </h3>
-                </div>
-                <div class="panel-body text-center">
-                    {{ statistics.expenses.sum | number_format(2, ',', ' ') }} zł
-                </div>
-            </div>
+            {{ macro.panel('success', 'chevron-down', 'header.incomes', statistics.incomes.sum) }}
 
         </div>
 
@@ -41,17 +101,7 @@
 
         <div class="col-xs-6 col-md-4">
 
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <i class="glyphicon glyphicon-retweet"></i>
-                        {{ 'header.balance' | trans }}
-                    </h3>
-                </div>
-                <div class="panel-body text-center">
-                    {{ statistics.balance | number_format(2, ',', ' ') }} zł
-                </div>
-            </div>
+            {{ macro.panel('info', 'retweet', 'header.balance', statistics.balance) }}
 
         </div>
 
@@ -82,79 +132,31 @@
     <div class="row">
 
         <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <i class="glyphicon glyphicon-tasks"></i>
-                        {{ 'header.expenses' | trans }}
-                    </h3>
-                </div>
-                <div class="panel-body">
-                    {% if operations.expenses is not empty%}
-                    <div class="text-center">
-                        <div id="groups-expenses-chart"></div>
-                    </div>
-                    <div class="table-responsive" style="height: 470px;">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>{{ 'model.contact._title' | trans }}</th>
-                                    <th>{{ 'model.operation.amount' | trans }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for group in operations.expenses %}
-                            <tr>
-                                <td><a href="{{ path('operation_index', {contact: group.contact_id}) }}">{{ group.contact_name }}</a></td>
-                                <td class="text-right">{{ group.amount | number_format(2,'.','') }}&nbsp;zł</td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
-                    {% endif %}
-                </div>
-            </div>
+
+            {{ macro.chart(_context, 'header.expenses', 'groups-contact-expenses-chart', 'contact', 'model.contact._title', operations.contact.expenses) }}
+
         </div>
 
         <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <i class="glyphicon glyphicon-tasks"></i>
-                        {{ 'header.incomes' | trans }}
-                    </h3>
-                </div>
-                <div class="panel-body">
-                    {% if operations.incomes is not empty%}
-                    <div class="text-center">
-                        <div id="groups-incomes-chart"></div>
-                    </div>
-                    <div class="table-responsive" style="height: 470px;">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>{{ 'model.contact._title' | trans }}</th>
-                                    <th>{{ 'model.operation.amount' | trans }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for group in operations.incomes %}
-                            <tr>
-                                <td><a href="{{ path('operation_index', {contact: group.contact_id}) }}">{{ group.contact_name }}</a></td>
-                                <td class="text-right">{{ group.amount | number_format(2,'.','') }}&nbsp;zł</td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
-                    {% endif %}
-                </div>
-            </div>
+
+            {{ macro.chart(_context, 'header.incomes', 'groups-contact-incomes-chart', 'contact', 'model.contact._title', operations.contact.incomes) }}
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6">
+
+            {{ macro.chart(_context, 'header.expenses', 'groups-tag-expenses-chart', 'tag', 'model.tag._title', operations.tag.expenses) }}
+
+        </div>
+
+        <div class="col-md-6">
+
+            {{ macro.chart(_context, 'header.incomes', 'groups-tag-incomes-chart', 'tag', 'model.tag._title', operations.tag.incomes) }}
+
         </div>
 
     </div>
@@ -167,8 +169,8 @@
             </h3>
         </div>
         <div class="panel-body text-center">
-            {% if operations.all is not empty%}
-            <div id="summary-chart"></div>
+            {% if timeLine is not empty%}
+            <div id="summary-timeline-chart"></div>
             {% else %}
             <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
             {% endif %}
@@ -226,49 +228,42 @@
             window.location.href = href;
         });
 
-        new Morris.Donut({
-            element: 'groups-expenses-chart',
-            formatter: function (y, data) {
-                return y + ' zł';
-            },
-            data: [
-            {% for group in operations.expenses | slice(0, 10) %}
-                { label: '{{ group.contact_name }}', value: '{{ group.amount | number_format(2,'.','') }}'}{% if not loop.last %},{% endif %}
-            {% endfor %}
-            ]
-        });
+        {{ macro.donut('groups-contact-expenses-chart', operations.contact.expenses) }}
+        {{ macro.donut('groups-contact-incomes-chart', operations.contact.incomes) }}
 
-        new Morris.Donut({
-            element: 'groups-incomes-chart',
-            formatter: function (y, data) {
-                return y + ' zł';
-            },
-            data: [
-            {% for group in operations.incomes | slice(0, 10) %}
-                { label: '{{ group.contact_name }}', value: '{{ group.amount | number_format(2,'.','') }}'}{% if not loop.last %},{% endif %}
-            {% endfor %}
-            ]
-        });
+        {{ macro.donut('groups-tag-expenses-chart', operations.tag.expenses) }}
+        {{ macro.donut('groups-tag-incomes-chart', operations.tag.incomes) }}
 
         new Morris.Line({
             // ID of the element in which to draw the chart.
-            element: 'summary-chart',
+            element: 'summary-timeline-chart',
             // Chart data records -- each entry in this array corresponds to a point on
             // the chart.
             data: [
             {% set sum = statistics.start %}
-            {% for day in operations.all %}
-                {% set sum = sum + day.sum %}
-                { day: '{{ day.date }}', operations: {{ sum | number_format(2,'.','') }} }{% if not loop.last %},{% endif %}
+            {% for key, day in timeLine %}
+                { day: '{{ key }}'
+                    {% for line in day %}
+                        {% if line.type == 'all' %}
+                            {% set sum = line.sum + sum %}
+                            {% set tmp = sum %}
+                    {% else %}
+                            {% set tmp = line.sum %}
+                    {% endif %}
+                    , '{{ line.type }}': {{ tmp | number_format(2,'.','') }}
+                    {% endfor %}
+                }
+                {% if not loop.last %},{% endif %}
             {% endfor %}
             ],
             // The name of the data record attribute that contains x-values.
             xkey: 'day',
             // A list of names of data record attributes that contain y-values.
-            ykeys: ['operations'],
+            ykeys: [{%  for line in ['all', 'expenses', 'incomes'] %}'{{ line }}'{% if not loop.last %},{% endif %}{% endfor %}],
             // Labels for the ykeys -- will be displayed when you hover over the
             // chart.
-            labels: ['{{ 'header.balance' | trans }}'],
+            labels: ['{{ 'header.balance' | trans }}', '{{ 'header.expenses' | trans }}', '{{ 'header.incomes' | trans }}'],
+            lineColors: ['blue', 'red', 'green'],
             continuousLine: true,
             postUnits: ' zł',
             hideHover: 'auto',

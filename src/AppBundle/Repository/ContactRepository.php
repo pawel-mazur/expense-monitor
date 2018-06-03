@@ -37,9 +37,11 @@ class ContactRepository extends EntityRepository
     {
         $qb = $this->createContactQB($user);
 
-        $qb->select('contact', 'operations');
+        $qb->select('contact', 'operations', 'tag');
 
-        $qb->leftJoin('contact.operations', 'operations');
+        $qb
+            ->leftJoin('contact.operations', 'operations')
+            ->leftJoin('contact.tags', 'tag');
 
         return $qb;
     }

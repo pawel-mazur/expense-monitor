@@ -38,20 +38,23 @@ class Contact
     protected $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Operation", mappedBy="contact")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Operation", mappedBy="contact", orphanRemoval=true)
      *
      * @var Operation[]
      */
     protected $operations;
 
     /**
-     * @ManyToMany(targetEntity="AppBundle\Entity\Tag", inversedBy="contacts", cascade={"all"})
+     * @ManyToMany(targetEntity="AppBundle\Entity\Tag", inversedBy="contacts")
      * @JoinTable(name="contacts_tags")
      *
      * @var Tag[]|ArrayCollection
      */
     protected $tags;
 
+    /**
+     * Contact constructor.
+     */
     public function __construct()
     {
         $this->tags = new ArrayCollection();

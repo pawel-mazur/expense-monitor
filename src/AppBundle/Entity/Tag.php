@@ -38,13 +38,16 @@ class Tag
     protected $name;
 
     /**
-     * @ManyToMany(targetEntity="AppBundle\Entity\Contact", mappedBy="tags", cascade={"all"})
+     * @ManyToMany(targetEntity="AppBundle\Entity\Contact", mappedBy="tags")
      * @JoinTable(name="contacts_tags")
      *
      * @var Contact[]|ArrayCollection
      */
     protected $contacts;
 
+    /**
+     * Tag constructor.
+     */
     public function __construct()
     {
         $this->contacts = new ArrayCollection();

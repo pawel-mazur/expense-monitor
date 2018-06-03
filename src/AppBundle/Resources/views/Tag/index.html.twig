@@ -16,8 +16,7 @@
                     <td><a href="{{ path('tag_edit', {'tag': tag.id}) }}">{{ tag.name }}</a></td>
                     <td>
                         {% for contact in tag.contacts %}
-                            <a href="{{ path('contact_edit', {contact: contact.id}) }}">{{ contact.name }}</a>
-                            {% if not loop.last %}, {% endif %}
+                            <a href="{{ path('contact_edit', {contact: contact.id}) }}">{{ contact.name }}</a>{% if not loop.last %}, {% endif %}
                         {% endfor %}
                     </td>
                 </tr>

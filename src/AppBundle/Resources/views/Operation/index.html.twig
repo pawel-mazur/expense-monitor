@@ -77,6 +77,7 @@
                     <th>{{ 'model._common.date' | trans }}</th>
                     <th>{{ 'model.operation._title' | trans }}</th>
                     <th>{{ 'model.contact._title' | trans }}</th>
+                    <th>{{ 'model.tag._title_plural' | trans }}</th>
                     <th>{{ 'model.operation.amount' | trans }}</th>
                 </tr>
             </thead>
@@ -87,6 +88,11 @@
                     <td>{{ operation.date | date('Y-m-d') }}</td>
                     <td><a href="{{ path('operation_edit', {'operation': operation.id }) }}" class="center-block">{{ operation.name }}</a></td>
                     <td><a href="{{ path('operation_index', {contact: operation.contact.id}) }}">{{ operation.contact.name }}</a></td>
+                    <td>
+                        {% for tag in operation.contact.tags %}
+                            <a href="{{ path('operation_index', {tag: tag.id}) }}">{{ tag.name }}</a>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
                     <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                 </tr>
             {% endfor %}

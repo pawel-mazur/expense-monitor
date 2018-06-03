@@ -72,6 +72,9 @@ class Import
      */
     protected $operations;
 
+    /**
+     * Import constructor.
+     */
     public function __construct()
     {
         $this->operations = new ArrayCollection();

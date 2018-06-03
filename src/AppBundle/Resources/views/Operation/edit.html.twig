@@ -7,13 +7,13 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <ul class="list-inline text-right">
-                <li>
-                    <a class="btn btn-info" href="{{ path('operation_index') }}">{{ 'form.return.label' | trans }}</a>
-                </li>
-                <li>
+                <li class="pull-left">
                     {{ form_start(delete_form) }}
                     <input type="submit" class="btn btn-danger" value="{{ 'form.delete.label' | trans }}">
                     {{ form_end(delete_form) }}
+                </li>
+                <li>
+                    <a class="btn btn-info" href="{{ path('operation_index') }}">{{ 'form.return.label' | trans }}</a>
                 </li>
             </ul>
         </div>

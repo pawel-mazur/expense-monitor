@@ -4,19 +4,29 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\Contact;
 use AppBundle\Entity\Operation;
+use AppBundle\Repository\ContactRepository;
 use DateTime;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class OperationType extends AbstractType
 {
+    /**
+     * @var TokenStorageInterface
+     */
+    private $tokenStorage;
+
+    public function __construct(TokenStorageInterface $tokenStorage)
+    {
+        $this->tokenStorage = $tokenStorage;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -25,6 +35,8 @@ class OperationType extends AbstractType
         /** @var Operation $operation */
         $operation = $options['data'];
 
+        $user = $this->tokenStorage->getToken()->getUser();
+
         $builder
             ->add(
                 'date',
@@ -32,7 +44,7 @@ class OperationType extends AbstractType
                 [
                     'label' => 'model._common.date',
                     'widget' => 'single_text',
-                    'format' => 'dd.MM.yyyyy',
+                    'format' => 'dd.MM.yyyy',
                     'data' => null === $operation->getDate() ? new DateTime() : $operation->getDate(),
                     'attr' => [
                         'class' => 'form-control input-inline datepicker',
@@ -59,18 +71,19 @@ class OperationType extends AbstractType
                     'label' => 'model.contact._title',
                     'class' => Contact::class,
                     'choice_label' => 'name',
-                    'query_builder' => function (EntityRepository $repository) {
-                        return $repository->createQueryBuilder('contact')
-                            ->orderBy('contact.name');
+                    'placeholder' => '',
+                    'query_builder' => function (ContactRepository $repository) use ($user) {
+                        return $repository->createContactQB($user);
                     },
                     'required' => true,
                 ]
             )
             ->add(
                 'amount',
-                NumberType::class,
+                MoneyType::class,
                 [
                     'label' => 'model.operation.amount',
+                    'currency' => 'PLN',
                     'required' => true,
                 ]
             );

@@ -3,10 +3,13 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Contact;
+use AppBundle\Entity\Tag;
 use AppBundle\Entity\User;
 use DateTime;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
+use PDO;
 
 /**
  * Class OperationRepository.
@@ -22,30 +25,56 @@ class OperationRepository extends EntityRepository
     {
         $qb = $this->createQueryBuilder('operation');
 
-        $qb->select('operation', 'contact');
+        $qb->select('operation', 'contact', 'tag');
 
         $qb
             ->innerJoin('operation.contact', 'contact')
+            ->leftJoin('contact.tags', 'tag');
+
+        $qb
             ->where($qb->expr()->eq('operation.user', ':user'))
-            ->setParameter(':user', $user)
-            ->orderBy('operation.date');
+            ->setParameter(':user', $user);
+
+        $qb
+            ->orderBy('operation.date')
+            ->addOrderBy('tag.name');
 
         return $qb;
     }
 
     /**
-     * @param User    $user
-     * @param Contact $contact
+     * @param User          $user
+     * @param DateTime|null $dateFrom
+     * @param DateTime|null $dateTo
+     * @param Contact|null  $contact
+     * @param Tag|null      $tag
      *
      * @return \Doctrine\ORM\QueryBuilder
      */
-    public function getOperationsByContactQB(User $user, Contact $contact = null)
+    public function getOperationsByContactTagQB(User $user, DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null, Tag $tag = null)
     {
         $qb = $this->getOperationsQB($user);
 
         if (null !== $contact) {
             $qb->andWhere($qb->expr()->eq('contact', ':contact'));
             $qb->setParameter(':contact', $contact);
+        }
+
+        if (null !== $tag) {
+            $qb->andWhere($qb->expr()->eq('tag.id', ':tag'));
+            $qb->setParameter(':tag', $tag);
+        }
+
+        if (null !== $dateFrom) {
+            $qb
+                ->andWhere($qb->expr()->gte('operation.date', ':dateFrom'))
+                ->setParameter(':dateFrom', $dateFrom, Type::DATE);
+        }
+
+        if (null !== $dateTo) {
+            $qb
+                ->andWhere($qb->expr()->lte('operation.date', ':dateTo'))
+                ->setParameter(':dateTo', $dateTo, Type::DATE);
         }
 
         return $qb;
@@ -56,10 +85,11 @@ class OperationRepository extends EntityRepository
      * @param DateTime|null $dateFrom
      * @param DateTime|null $dateTo
      * @param Contact|null  $contact
+     * @param Tag|null      $tag
      *
      * @return QueryBuilder
      */
-    public function getOperationsSumQB(User $user, DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null)
+    public function getOperationsSumQB(User $user, DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null, Tag $tag = null)
     {
         $qb = $this->_em->getConnection()->createQueryBuilder();
         $qb
@@ -71,13 +101,13 @@ class OperationRepository extends EntityRepository
 
         if (null !== $dateFrom) {
             $qb
-                ->andWhere($qb->expr()->gt('operation.date', ':dateFrom'))
+                ->andWhere($qb->expr()->gte('operation.date', ':dateFrom'))
                 ->setParameter(':dateFrom', $dateFrom->format('Y-m-d'));
         }
 
         if (null !== $dateTo) {
             $qb
-                ->andWhere($qb->expr()->lt('operation.date', ':dateTo'))
+                ->andWhere($qb->expr()->lte('operation.date', ':dateTo'))
                 ->setParameter(':dateTo', $dateTo->format('Y-m-d'));
         }
 
@@ -85,6 +115,15 @@ class OperationRepository extends EntityRepository
             $qb
                 ->andWhere($qb->expr()->eq('operation.id_contact', ':contact'))
                 ->setParameter(':contact', $contact->getId());
+        }
+
+        if (null !== $tag) {
+            $qb
+                ->innerJoin('operation', 'contacts', 'contact', $qb->expr()->eq('operation.id_contact', 'contact.id'))
+                ->innerJoin('contact', 'contacts_tags', 'contactTag', $qb->expr()->eq('contact.id', 'contactTag.contact_id'))
+                ->innerJoin('contactTag', 'tags', 'tag', $qb->expr()->eq('contactTag.tag_id', 'tag.id'))
+                ->andWhere($qb->expr()->eq('tag.id', ':tag'))
+                ->setParameter(':tag', $tag->getId());
         }
 
         return $qb;
@@ -101,7 +140,7 @@ class OperationRepository extends EntityRepository
     {
         $qb = $this->getOperationsSumQB($user, $dateFrom, $dateTo);
 
-        $qb->andWhere($qb->expr()->gt('operation.amount', 0));
+        $qb->andWhere($qb->expr()->lt('operation.amount', 0));
 
         return $qb;
     }
@@ -117,7 +156,38 @@ class OperationRepository extends EntityRepository
     {
         $qb = $this->getOperationsSumQB($user, $dateFrom, $dateTo);
 
-        $qb->andWhere($qb->expr()->lt('operation.amount', 0));
+        $qb->andWhere($qb->expr()->gt('operation.amount', 0));
+
+        return $qb;
+    }
+
+    /**
+     * @param User     $user
+     * @param DateTime $dateFrom
+     * @param DateTime $dateTo
+     *
+     * @return QueryBuilder
+     */
+    public function getOperationsSumGroupByDate(User $user, DateTime $dateFrom, DateTime $dateTo)
+    {
+        $qb = $this->getOperationsSumQB($user, $dateFrom, $dateTo);
+
+        $qb
+            ->select('operation.date', 'SUM(operation.amount)', 'MAX(operation.amount)', 'MIN(operation.amount)', 'AVG(operation.amount)', ':type as type')
+            ->orderBy('operation.date')
+            ->groupBy('operation.date');
+
+        if ($dateFrom->diff($dateTo)->y >= 1) {
+            $select = $qb->getQueryPart('select');
+            array_shift($select);
+
+            $qb->select("to_char(operation.date, 'YYYY-MM') as date");
+            $qb->addSelect($select);
+            $qb->groupBy(1);
+            $qb->orderBy(1);
+        }
+
+        $qb->setParameter(':type', 'all');
 
         return $qb;
     }
@@ -129,26 +199,59 @@ class OperationRepository extends EntityRepository
      *
      * @return QueryBuilder
      */
-    public function getOperationsSumGroupByDate(User $user, DateTime $dateFrom, DateTime $dateTo)
+    public function getOperationsSumGroupByDateExpenses(User $user, DateTime $dateFrom, DateTime $dateTo)
     {
-        $qb = $this->getOperationsSumQB($user, $dateFrom, $dateTo);
+        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
 
-        $qb
-            ->addSelect('operation.date')
-            ->orderBy('operation.date')
-            ->groupBy('operation.date');
+        $qb->andWhere($qb->expr()->lt('operation.amount', 0));
 
-        if ($dateFrom->diff($dateTo)->y >= 1) {
-            $select = $qb->getQueryPart('select');
-            array_pop($select);
-
-            $qb->select("to_char(operation.date, 'YYYY-MM') as date");
-            $qb->addSelect($select);
-            $qb->groupBy(1);
-            $qb->orderBy(1);
-        }
+        $qb->setParameter(':type', 'expenses');
 
         return $qb;
+    }
+
+    /**
+     * @param User          $user
+     * @param DateTime|null $dateFrom
+     * @param DateTime|null $dateTo
+     *
+     * @return QueryBuilder
+     */
+    public function getOperationsSumGroupByDateIncomes(User $user, DateTime $dateFrom, DateTime $dateTo)
+    {
+        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
+
+        $qb->andWhere($qb->expr()->gt('operation.amount', 0));
+
+        $qb->setParameter(':type', 'incomes');
+
+        return $qb;
+    }
+
+    /**
+     * @param User     $user
+     * @param DateTime $dateFrom
+     * @param DateTime $dateTo
+     *
+     * @return mixed
+     */
+    public function getOperationsTimeLineGroupByDateQB(User $user, DateTime $dateFrom, DateTime $dateTo)
+    {
+        $sum = [
+            'all' => $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo)->execute()->fetchAll(PDO::FETCH_GROUP),
+            'expenses' => $this->getOperationsSumGroupByDateExpenses($user, $dateFrom, $dateTo)->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE),
+            'incomes' => $this->getOperationsSumGroupByDateIncomes($user, $dateFrom, $dateTo)->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE),
+        ];
+
+        $timeLine = $sum['all'];
+        foreach ($sum['expenses'] as $day => $data) {
+            array_push($timeLine[$day], $data);
+        }
+        foreach ($sum['incomes'] as $day => $data) {
+            array_push($timeLine[$day], $data);
+        }
+
+        return $timeLine;
     }
 
     /**
@@ -163,7 +266,7 @@ class OperationRepository extends EntityRepository
         $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
 
         $qb
-            ->select('contact.id contact_id', 'contact.name contact_name', 'SUM(operation.amount) amount')
+            ->select('contact.id', 'contact.name', 'SUM(operation.amount) amount')
             ->innerJoin('operation', 'contacts', 'contact', $qb->expr()->eq('operation.id_contact', 'contact.id'))
             ->orderBy('amount')
             ->groupBy('contact.id')
@@ -198,6 +301,62 @@ class OperationRepository extends EntityRepository
     public function getOperationsSumGroupByContactIncomesQB(User $user, DateTime $dateFrom, DateTime $dateTo)
     {
         $qb = $this->getOperationsSumGroupByContactQB($user, $dateFrom, $dateTo);
+
+        $qb->andWhere($qb->expr()->gt('operation.amount', 0));
+        $qb->orderBy('amount', 'DESC');
+
+        return $qb;
+    }
+
+    /**
+     * @param User     $user
+     * @param DateTime $dateFrom
+     * @param DateTime $dateTo
+     *
+     * @return QueryBuilder
+     */
+    public function getOperationsSumGroupByTagQB(User $user, DateTime $dateFrom, DateTime $dateTo)
+    {
+        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
+
+        $qb
+            ->select('tag.id', 'tag.name', 'SUM(operation.amount) amount')
+            ->innerJoin('operation', 'contacts', 'contact', $qb->expr()->eq('operation.id_contact', 'contact.id'))
+            ->leftJoin('contact', 'contacts_tags', 'contactTag', $qb->expr()->eq('contact.id', 'contactTag.contact_id'))
+            ->leftJoin('contactTag', 'tags', 'tag', $qb->expr()->eq('contactTag.tag_id', 'tag.id'))
+            ->orderBy('amount')
+            ->groupBy('tag.id')
+        ;
+
+        return $qb;
+    }
+
+    /**
+     * @param User     $user
+     * @param DateTime $dateFrom
+     * @param DateTime $dateTo
+     *
+     * @return QueryBuilder
+     */
+    public function getOperationsSumGroupByTagExpensesQB(User $user, DateTime $dateFrom, DateTime $dateTo)
+    {
+        $qb = $this->getOperationsSumGroupByTagQB($user, $dateFrom, $dateTo);
+
+        $qb->andWhere($qb->expr()->lt('operation.amount', 0));
+
+        return $qb;
+    }
+
+    /**
+     * @param User     $user
+     * @param DateTime $dateFrom
+     * @param DateTime $dateTo
+     *
+     * @return QueryBuilder
+     */
+    public function getOperationsSumGroupByTagIncomesQB(User $user, DateTime $dateFrom, DateTime $dateTo)
+    {
+        $qb = $this->getOperationsSumGroupByTagQB($user, $dateFrom, $dateTo);
 
         $qb->andWhere($qb->expr()->gt('operation.amount', 0));
         $qb->orderBy('amount', 'DESC');

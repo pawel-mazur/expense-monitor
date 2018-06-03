@@ -82,8 +82,6 @@ class Operation
     /**
      * @ORM\Column(name="hash", type="string", nullable=false)
      *
-     * @Assert\NotBlank()
-     *
      * @var string
      */
     protected $hash;
@@ -225,7 +223,7 @@ class Operation
     }
 
     /**
-     * @ORM\PostPersist()
+     * @ORM\PrePersist()
      *
      * @return $this
      */

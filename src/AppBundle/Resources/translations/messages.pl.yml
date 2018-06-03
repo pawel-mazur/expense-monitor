@@ -17,25 +17,25 @@ flash:
 form:
   file:
     label: 'Plik'
+  new:
+    label: 'Dodaj'
+    flash: 'Pomyślnie dodano obiekt'
   edit:
     label: 'Edytuj'
-    flash: 'Pomyślnie edytowano zmiany'
+    flash: 'Pomyślnie edytowano obiekt'
+  delete:
+    label: 'Usuń'
+    flash: 'Pomyślnie usunięto obiekt'
   save:
     label: 'Zapisz'
     flash: 'Pomyślnie zapisano zmiany'
   submit:
     label: 'Prześlij'
     flash: 'Pomyślnie przesłano dane'
-  delete:
-    label: 'Usuń'
-    flash: 'Pomyślnie usunięto obiekt'
   return:
     label: 'Wróć'
   import:
     label: 'Importuj'
-  new:
-    label: 'Dodaj'
-    flash: 'Pomyślnie '
 
 header:
   incomes: 'Przychody'
@@ -72,6 +72,7 @@ model:
     id: '#id'
     date: 'Data'
     name: 'Nazwa'
+    other: 'inne'
   contact:
     _title: 'Kontakt'
     _title_plural: 'Kontakty'
