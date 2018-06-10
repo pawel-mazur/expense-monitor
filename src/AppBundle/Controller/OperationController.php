@@ -6,6 +6,7 @@ use AppBundle\Entity\Contact;
 use AppBundle\Entity\Operation;
 use AppBundle\Entity\Tag;
 use AppBundle\Form\OperationType;
+use AppBundle\Repository\OperationRepository;
 use DateTime;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -34,15 +35,17 @@ class OperationController extends Controller
      * @QueryParam(name="dateTo", nullable=true)
      * @QueryParam(name="contact", nullable=true, requirements="\d+")
      * @QueryParam(name="tag", nullable=true, requirements="\d+")
+     * @QueryParam(name="group", nullable=true, default="daily", requirements="daily|weekly|monthly|yearly")
      *
      * @param DateTime     $dateFrom
      * @param DateTime     $dateTo
      * @param Contact|null $contact
      * @param Tag|null     $tag
+     * @param string       $group
      *
      * @return array
      */
-    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null, Tag $tag = null)
+    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null, Tag $tag = null, $group = OperationRepository::GROUP_DAILY)
     {
         $em = $this->getDoctrine()->getManager();
         $operationRepository = $em->getRepository(Operation::class);
@@ -56,9 +59,14 @@ class OperationController extends Controller
 
         $statistics = $operationRepository->getOperationsSumQB($this->getUser(), $dateFrom, $dateTo, $contact, $tag)->execute()->fetch();
 
-        $timeLine = $operationRepository->getOperationsTimeLineGroupByContactQB($this->getUser(), $dateFrom, $dateTo, $contact);
+        $timeLine = $operationRepository->getOperationsTimeLineGroupByContactQB($this->getUser(), $dateFrom, $dateTo, $contact, $group);
 
         return [
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
+            'contact' => $contact,
+            'tag' => $tag,
+            'group' => $group,
             'operations' => $operations,
             'statistics' => $statistics,
             'timeLine' => $timeLine,

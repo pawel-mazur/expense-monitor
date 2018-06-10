@@ -9,6 +9,13 @@ calendar:
   week: 'tydzień'
   year: 'rok'
 
+group:
+  _title: 'Grupuj'
+  daily: 'dziennie'
+  weekly: 'tygodniowo'
+  monthly: 'miesięcznie'
+  yearly: 'rocznie'
+
 flash:
   form:
     success: 'Pomyślnie zaimportowano operacje'

@@ -6,6 +6,7 @@ use AppBundle\Entity\Operation;
 use AppBundle\Repository\OperationRepository;
 use DateInterval;
 use DateTime;
+use FOS\RestBundle\Controller\Annotations\QueryParam;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -14,15 +15,22 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class DefaultController extends Controller
 {
     /**
-     * @Route("/{dateFrom}/{dateTo}", name="homepage")
+     * @Route("/", name="homepage")
      * @Template()
+     *
+     * @QueryParam(name="dateFrom", nullable=true)
+     * @QueryParam(name="dateTo", nullable=true)
+     * @QueryParam(name="contact", nullable=true, requirements="\d+")
+     * @QueryParam(name="tag", nullable=true, requirements="\d+")
+     * @QueryParam(name="group", nullable=true, default="daily", requirements="daily|weekly|monthly|yearly")
      *
      * @param DateTime $dateFrom
      * @param DateTime $dateTo
+     * @param string   $group
      *
      * @return array|RedirectResponse
      */
-    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null)
+    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null, $group = OperationRepository::GROUP_DAILY)
     {
         /** @var OperationRepository $operationRepository */
         $operationRepository = $this->get('doctrine.orm.entity_manager')->getRepository(Operation::class);
@@ -68,12 +76,13 @@ class DefaultController extends Controller
             ],
         ];
 
-        $timeLine = $operationRepository->getOperationsTimeLineGroupByDateQB($this->getUser(), $dateFrom, $dateTo);
+        $timeLine = $operationRepository->getOperationsTimeLineGroupByDateQB($this->getUser(), $dateFrom, $dateTo, $group);
 
         return [
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
             'dates' => $dates,
+            'group' => $group,
             'statistics' => $statistics,
             'operations' => $operations,
             'timeLine' => $timeLine,

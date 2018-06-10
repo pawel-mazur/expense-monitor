@@ -16,6 +16,11 @@ use PDO;
  */
 class OperationRepository extends EntityRepository
 {
+    const GROUP_DAILY = 'daily';
+    const GROUP_WEEKLY = 'weekly';
+    const GROUP_MONTHLY = 'monthly';
+    const GROUP_YEARLY = 'yearly';
+
     /**
      * @param User $user
      *
@@ -165,27 +170,45 @@ class OperationRepository extends EntityRepository
      * @param User     $user
      * @param DateTime $dateFrom
      * @param DateTime $dateTo
+     * @param string   $group
      *
      * @return QueryBuilder
      */
-    public function getOperationsSumGroupByDate(User $user, DateTime $dateFrom = null, DateTime $dateTo = null)
+    public function getOperationsSumGroupByDate(User $user, DateTime $dateFrom = null, DateTime $dateTo = null, $group = self::GROUP_DAILY)
     {
         $qb = $this->getOperationsSumQB($user, $dateFrom, $dateTo);
 
-        $qb
-            ->select('operation.date', 'SUM(operation.amount)', 'MAX(operation.amount)', 'MIN(operation.amount)', 'AVG(operation.amount)', ':type as type')
-            ->orderBy('operation.date')
-            ->groupBy('operation.date');
+        $qb->select('SUM(operation.amount)', 'MAX(operation.amount)', 'MIN(operation.amount)', 'AVG(operation.amount)', ':type as type');
 
-        if (null === $dateFrom || null === $dateTo || $dateFrom->diff($dateTo)->y >= 1) {
-            $select = $qb->getQueryPart('select');
-            array_shift($select);
+        $select = $qb->getQueryPart('select');
 
-            $qb->select("to_char(operation.date, 'YYYY-MM') as date");
-            $qb->addSelect($select);
-            $qb->groupBy(1);
-            $qb->orderBy(1);
+        switch ($group) {
+
+            case self::GROUP_DAILY:
+
+                $qb->select("to_char(operation.date, 'YYYY-MM-DD') as date");
+                break;
+
+
+            case self::GROUP_WEEKLY:
+
+                $qb->select("to_char(operation.date, 'YYYY-WW') as date");
+                break;
+
+            case self::GROUP_MONTHLY:
+
+                $qb->select("to_char(operation.date, 'YYYY-MM') as date");
+                break;
+
+            case self::GROUP_YEARLY:
+
+                $qb->select("to_char(operation.date, 'YYYY') as date");
+                break;
         }
+
+        $qb->addSelect($select)
+            ->groupBy(1)
+            ->orderBy(1);
 
         $qb->setParameter(':type', 'all');
 
@@ -196,12 +219,13 @@ class OperationRepository extends EntityRepository
      * @param User          $user
      * @param DateTime|null $dateFrom
      * @param DateTime|null $dateTo
+     * @param string        $group
      *
      * @return QueryBuilder
      */
-    public function getOperationsSumGroupByDateExpenses(User $user, DateTime $dateFrom, DateTime $dateTo)
+    public function getOperationsSumGroupByDateExpenses(User $user, DateTime $dateFrom, DateTime $dateTo, $group)
     {
-        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
+        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo, $group);
 
         $qb->andWhere($qb->expr()->lt('operation.amount', 0));
 
@@ -214,12 +238,13 @@ class OperationRepository extends EntityRepository
      * @param User          $user
      * @param DateTime|null $dateFrom
      * @param DateTime|null $dateTo
+     * @param string        $group
      *
      * @return QueryBuilder
      */
-    public function getOperationsSumGroupByDateIncomes(User $user, DateTime $dateFrom, DateTime $dateTo)
+    public function getOperationsSumGroupByDateIncomes(User $user, DateTime $dateFrom, DateTime $dateTo, $group)
     {
-        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
+        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo, $group);
 
         $qb->andWhere($qb->expr()->gt('operation.amount', 0));
 
@@ -232,15 +257,16 @@ class OperationRepository extends EntityRepository
      * @param User     $user
      * @param DateTime $dateFrom
      * @param DateTime $dateTo
+     * @param $group
      *
      * @return mixed
      */
-    public function getOperationsTimeLineGroupByDateQB(User $user, DateTime $dateFrom, DateTime $dateTo)
+    public function getOperationsTimeLineGroupByDateQB(User $user, DateTime $dateFrom, DateTime $dateTo, $group)
     {
         $sum = [
-            'all' => $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo)->execute()->fetchAll(PDO::FETCH_GROUP),
-            'expenses' => $this->getOperationsSumGroupByDateExpenses($user, $dateFrom, $dateTo)->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE),
-            'incomes' => $this->getOperationsSumGroupByDateIncomes($user, $dateFrom, $dateTo)->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE),
+            'all' => $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo, $group)->execute()->fetchAll(PDO::FETCH_GROUP),
+            'expenses' => $this->getOperationsSumGroupByDateExpenses($user, $dateFrom, $dateTo, $group)->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE),
+            'incomes' => $this->getOperationsSumGroupByDateIncomes($user, $dateFrom, $dateTo, $group)->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE),
         ];
 
         $timeLine = $sum['all'];
@@ -313,12 +339,13 @@ class OperationRepository extends EntityRepository
      * @param DateTime     $dateFrom
      * @param DateTime     $dateTo
      * @param Contact|null $contact
+     * @param string       $group
      *
      * @return array
      */
-    public function getOperationsTimeLineGroupByContactQB(User $user, DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null)
+    public function getOperationsTimeLineGroupByContactQB(User $user, DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null, $group = self::GROUP_DAILY)
     {
-        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
+        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo, $group);
 
         $qb
             ->addSelect('contact.id', 'contact.name')
