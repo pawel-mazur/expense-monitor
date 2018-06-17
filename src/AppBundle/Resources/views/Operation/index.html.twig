@@ -70,6 +70,22 @@
 
     </div>
 
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <i class="glyphicon glyphicon-tasks"></i>
+                {{ 'header.summary' | trans }}
+            </h3>
+        </div>
+        <div class="panel-body text-center">
+            {% if timeLine.days is not empty%}
+                <div id="summary-timeline-chart"></div>
+            {% else %}
+                <div class="alert alert-info">{{ 'info.no_data' | trans }}</div>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
@@ -116,6 +132,34 @@
                     dataSrc: 0
                 }
             });
+        });
+
+        new Morris.Line({
+            // ID of the element in which to draw the chart.
+            element: 'summary-timeline-chart',
+            // Chart data records -- each entry in this array corresponds to a point on
+            // the chart.
+            data: [
+                {% for key, day in timeLine.days %}
+                { day: '{{ key }}'
+                    {% for line in day %}
+                    , '{{ line.id }}': {{ line.sum | number_format(2,'.','') }}
+                    {% endfor %}
+                }
+                {% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            // The name of the data record attribute that contains x-values.
+            xkey: 'day',
+            // A list of names of data record attributes that contain y-values.
+            ykeys: [{%  for key, contact in timeLine.legend %}'{{ key }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            // Labels for the ykeys -- will be displayed when you hover over the
+            // chart.
+            labels: [{%  for key, contact in timeLine.legend %}'{{ contact }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            continuousLine: true,
+            postUnits: ' zł',
+            hideHover: 'auto',
+            resize: true
         });
 
     </script>

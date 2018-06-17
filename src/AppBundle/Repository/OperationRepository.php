@@ -168,7 +168,7 @@ class OperationRepository extends EntityRepository
      *
      * @return QueryBuilder
      */
-    public function getOperationsSumGroupByDate(User $user, DateTime $dateFrom, DateTime $dateTo)
+    public function getOperationsSumGroupByDate(User $user, DateTime $dateFrom = null, DateTime $dateTo = null)
     {
         $qb = $this->getOperationsSumQB($user, $dateFrom, $dateTo);
 
@@ -177,7 +177,7 @@ class OperationRepository extends EntityRepository
             ->orderBy('operation.date')
             ->groupBy('operation.date');
 
-        if ($dateFrom->diff($dateTo)->y >= 1) {
+        if (null === $dateFrom || null === $dateTo || $dateFrom->diff($dateTo)->y >= 1) {
             $select = $qb->getQueryPart('select');
             array_shift($select);
 
@@ -306,6 +306,40 @@ class OperationRepository extends EntityRepository
         $qb->orderBy('amount', 'DESC');
 
         return $qb;
+    }
+
+    /**
+     * @param User         $user
+     * @param DateTime     $dateFrom
+     * @param DateTime     $dateTo
+     * @param Contact|null $contact
+     *
+     * @return array
+     */
+    public function getOperationsTimeLineGroupByContactQB(User $user, DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null)
+    {
+        $qb = $this->getOperationsSumGroupByDate($user, $dateFrom, $dateTo);
+
+        $qb
+            ->addSelect('contact.id', 'contact.name')
+            ->innerJoin('operation', 'contacts', 'contact', $qb->expr()->eq('operation.id_contact', 'contact.id'))
+            ->addGroupBy('contact.id');
+
+        if (null !== $contact) {
+            $qb->andWhere($qb->expr()->eq('contact.id', ':contact'));
+            $qb->setParameter(':contact', $contact->getId());
+        }
+
+        $data = $qb->execute()->fetchAll();
+        $timeLine = [];
+        $contact = [];
+
+        foreach ($data as $row) {
+            $timeLine[$row['date']][$row['id']] = $row;
+            $contact[$row['id']] = $row['name'];
+        }
+
+        return ['days' => $timeLine, 'legend' => $contact];
     }
 
     /**

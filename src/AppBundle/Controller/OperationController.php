@@ -56,9 +56,12 @@ class OperationController extends Controller
 
         $statistics = $operationRepository->getOperationsSumQB($this->getUser(), $dateFrom, $dateTo, $contact, $tag)->execute()->fetch();
 
+        $timeLine = $operationRepository->getOperationsTimeLineGroupByContactQB($this->getUser(), $dateFrom, $dateTo, $contact);
+
         return [
             'operations' => $operations,
             'statistics' => $statistics,
+            'timeLine' => $timeLine,
         ];
     }
 
