@@ -19,3 +19,6 @@ monolog:
             level: debug
         console:
             type:  console
+
+sentry:
+    dsn: "https://50e555a6e5424fb3baacf00e6cf6a96e:64411623548042e299d674c7c2d81303@sentry.io/1214313"

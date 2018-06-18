@@ -11,5 +11,5 @@ install:
   - make database-init fixtures
 
 script:
-  - make cs-fix
+  - make cs-check
   - make test

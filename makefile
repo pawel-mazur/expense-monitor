@@ -37,6 +37,9 @@ npm:
 composer:
 	$(RUN) -u $(USER) composer install --no-interaction
 
+cs-check:
+	$(RUN) web bin/php-cs-fixer fix --dry-run
+
 cs-fix:
 	$(RUN) web bin/php-cs-fixer fix
 

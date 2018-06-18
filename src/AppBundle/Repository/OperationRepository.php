@@ -183,12 +183,10 @@ class OperationRepository extends EntityRepository
         $select = $qb->getQueryPart('select');
 
         switch ($group) {
-
             case self::GROUP_DAILY:
 
                 $qb->select("to_char(operation.date, 'YYYY-MM-DD') as date");
                 break;
-
 
             case self::GROUP_WEEKLY:
 

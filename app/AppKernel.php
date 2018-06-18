@@ -19,6 +19,7 @@ class AppKernel extends Kernel implements CompilerPassInterface
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
+            new Sentry\SentryBundle\SentryBundle(),
             new FOS\UserBundle\FOSUserBundle(),
             new FOS\RestBundle\FOSRestBundle(),
             new AppBundle\AppBundle(),
@@ -59,7 +60,14 @@ class AppKernel extends Kernel implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
+        $version = exec('git rev-parse --short HEAD');
+
         $container->setParameter('app.repository', 'https://github.com/pawel-mazur/spending-monitor');
-        $container->setParameter('app.version', exec('git rev-parse --short HEAD'));
+        $container->setParameter('app.version', $version);
+
+        $options = $container->getParameter('sentry.options');
+        $options['release'] = $version;
+
+        $container->setParameter('sentry.options', $options);
     }
 }
