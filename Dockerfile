@@ -13,8 +13,15 @@ RUN sed -ri -e "s!/var/www/html!$APACHE_DOCUMENT_ROOT!g" /etc/apache2/sites-avai
     sed -ri -e "s!/var/www/!$APACHE_DOCUMENT_ROOT!g" /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf && \
     a2enmod rewrite
 
+VOLUME /var/www/html/var/logs /var/www/html/var/imports
+
 # Configure PHP
 COPY docker/web/xdebug.ini /usr/local/etc/php/mods-available/xdebug.ini
+
+# Entrypoint
+COPY docker/web/entrypoint /usr/local/bin/
+ENTRYPOINT ["entrypoint"]
+CMD ["run"]
 
 # Copy sources
 COPY . /var/www/html

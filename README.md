@@ -24,6 +24,9 @@ services:
             - 80:80
         links:
             - database
+        volumes:
+            - imports:/var/www/html/web/var/imports
+            - logs:/var/www/html/web/var/logs
 
     database:
         image: postgres
@@ -31,6 +34,14 @@ services:
         environment:
             POSTGRES_USER: spendingmonitor
             POSTGRES_PASSWORD: spendingmonitor
+        volumes:
+            - database:/var/lib/postgresql/data
+
+volumes:
+    database:
+    imports:
+    logs:
+
 ```
 
 ## Budowanie/Aktualizowanie środowiska
