@@ -1,29 +1,29 @@
-WRITABLE_DIRS = var/cache var/logs var/sessions var/imports
+WRITABLE-DIRS = var/cache var/logs var/sessions var/imports
 
-ifeq ($(shell docker-compose -v 2>/dev/null),)
-CONSOLE ?= bin/console
-else
-DOCKER_COMPOSE = docker-compose
-RUN = $(DOCKER_COMPOSE) run --rm
-EXEC = $(DOCKER_COMPOSE) exec
-USER != echo `id -u`:`id -g`
 
-BASH ?= $(EXEC) web
-CONSOLE ?= $(RUN) web bin/console
+ifneq ($(shell docker-compose -v 2>/dev/null),)
 
 # IMAGE
 
-build: env npm composer cs-fix
-	$(DOCKER_COMPOSE) build web
+DOCKER-COMPOSE = docker-compose
+RUN = $(DOCKER-COMPOSE) run --rm -u `id -u`:`id -g`
+EXEC = $(DOCKER-COMPOSE) exec
+BASH ?= $(EXEC) web
+
+build: env pull npm composer
+	$(DOCKER-COMPOSE) build web
+
+pull:
+	docker-compose pull
 
 push:
-	docker push pakumaz/spending-monitor
+	docker-compose push web
 
 env:
 	cp --no-clobber .env.dist .env
 
 up:
-	$(DOCKER_COMPOSE) up -d web
+	$(DOCKER-COMPOSE) up -d web
 
 bash: up
 	$(EXEC) web /bin/bash
@@ -32,36 +32,29 @@ database: up
 	$(EXEC) database psql -U spendingmonitor spendingmonitor
 
 npm:
-	$(RUN) -u $(USER) npm
+	$(RUN) npm npm install
 
 composer:
-	$(RUN) -u $(USER) composer install --no-interaction
-
-cs-check:
-	$(RUN) web bin/php-cs-fixer fix --dry-run
-
-cs-fix:
-	$(RUN) web bin/php-cs-fixer fix
-
-test:
-	$(RUN) web bin/phpunit
+	$(RUN) composer composer install --no-interaction
 
 setfacl:
-	setfacl -RL -m u:www-data:rwX -m u:`whoami`:rwX $(WRITABLE_DIRS)
-	setfacl -dRL -m u:www-data:rwX -m u:`whoami`:rwX $(WRITABLE_DIRS)
+	setfacl -RL -m u:www-data:rwX -m u:`whoami`:rwX $(WRITABLE-DIRS)
+	setfacl -dRL -m u:www-data:rwX -m u:`whoami`:rwX $(WRITABLE-DIRS)
 
 clean:
 	$(RUN) web rm -rf node_modules vendor var/cache/* var/logs/* var/sessions/* web/vendor
 
-endif
-
+else
 
 # APP
 
+CONSOLE ?= bin/console
+CS-FIX ?= bin/php-cs-fixer
+PHPUNIT ?= bin/phpunit
 
 init: cache database-init fixtures
 
-update: database-update
+update: cache database-update
 
 cache: cache-clear writable
 cache-clear:
@@ -69,7 +62,7 @@ cache-clear:
 	$(CONSOLE) cache:clear --env=dev
 
 writable:
-	$(BASH) chown -R www-data:www-data $(WRITABLE_DIRS)
+	$(BASH) chown -R www-data:www-data $(WRITABLE-DIRS)
 
 database-init:
 	$(CONSOLE) doctrine:database:drop --force --if-exists
@@ -81,12 +74,23 @@ database-update:
 	$(CONSOLE) doctrine:migration:migrate --no-interaction --allow-no-migration
 
 fixtures:
-	$(CONSOLE) doctrine:fixtures:load --no-interaction
+	$(CONSOLE) doctrine:fixtures:load --no-interaction --no-interaction
+
+cs-check:
+	$(CS-FIX) fix --dry-run
+
+cs-fix:
+	$(CS-FIX) fix
+
+test:
+	$(PHPUNIT)
 
 xdbon:
-	$(BASH) ln -sf /usr/local/etc/php/mods-available/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
-	$(if $(DOCKER_COMPOSE), $(DOCKER_COMPOSE) restart web)
+	ln -sf /usr/local/etc/php/mods-available/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+	apachectl -k graceful
 
 xdboff:
-	$(BASH) rm -f /usr/local/etc/php/conf.d/xdebug.ini
-	$(if $(DOCKER_COMPOSE), $(DOCKER_COMPOSE) restart web)
+	rm -f /usr/local/etc/php/conf.d/xdebug.ini
+	apachectl -k graceful
+
+endif

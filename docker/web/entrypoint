@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    init|update|cache|writable|database-init|database-update|fixtures|cs-check|cs-fix|test|xdbon|xdboff)
+		set -- make "$@"
+	;;
+esac
+
+if [ "$1" = "run" ]; then
+
+    make update
+
+    exec apache2-foreground
+
+fi
+
+exec "$@"

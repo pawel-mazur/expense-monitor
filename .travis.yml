@@ -4,12 +4,17 @@ cache:
     - web/vendor
     - vendor
 
-install:
+before_install:
   - make env
+  - docker-compose pull
+
+install:
   - docker-compose run npm
   - docker-compose run composer install --no-interaction
-  - make database-init fixtures
+  - while ! docker-compose run web bin/console doctrine:query:sql "SELECT TRUE" > /dev/null 2>&1; do
+      echo 'Waiting for postgres...'
+      sleep 1;
+    done;
 
 script:
-  - make cs-check
-  - make test
+  - docker-compose run web make init cs-check test
