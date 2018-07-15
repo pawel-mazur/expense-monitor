@@ -1,6 +1,10 @@
 {% extends 'base.html.twig' %}
 
+{% form_theme filter 'filter_layout.html.twig' %}
+
 {% block body %}
+
+    {{ form(filter) }}
 
     <div class="table-responsive">
         <table class="table table-bordered">

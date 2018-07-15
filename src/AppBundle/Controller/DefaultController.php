@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Operation;
+use AppBundle\Filter\OperationFilterType;
 use AppBundle\Repository\OperationRepository;
 use DateInterval;
 use DateTime;
@@ -11,6 +12,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
@@ -18,71 +20,74 @@ class DefaultController extends Controller
      * @Route("/", name="homepage")
      * @Template()
      *
-     * @QueryParam(name="dateFrom", nullable=true)
-     * @QueryParam(name="dateTo", nullable=true)
-     * @QueryParam(name="contact", nullable=true, requirements="\d+")
-     * @QueryParam(name="tag", nullable=true, requirements="\d+")
-     * @QueryParam(name="group", nullable=true, default="daily", requirements="daily|weekly|monthly|yearly")
+     * @param Request $request
      *
-     * @param DateTime $dateFrom
-     * @param DateTime $dateTo
-     * @param string   $group
+     * @param DateTime|null $dateFrom
+     * @param DateTime|null $dateTo
+     * @param string $group
      *
-     * @return array|RedirectResponse
+     * @return array
      */
-    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null, $group = OperationRepository::GROUP_DAILY)
+    public function indexAction(Request $request, DateTime $dateFrom = null, DateTime $dateTo = null, $group = OperationRepository::GROUP_DAILY)
     {
         /** @var OperationRepository $operationRepository */
-        $operationRepository = $this->get('doctrine.orm.entity_manager')->getRepository(Operation::class);
+        $operationRepository = $this->get('doctrine')->getRepository(Operation::class);
 
-        $date = new DateTime();
-        if (null === $dateFrom) {
-            $dateFrom = new DateTime($date->format('Y-m'));
+        $filter = $this->get('form.factory')->create(OperationFilterType::class);
+        $filter->handleRequest($request);
+
+        $operationsSumStartQB = $operationRepository->getOperationsSumQB($this->getUser());
+        $operationsSumQB = $operationRepository->getOperationsSumQB($this->getUser());
+        $operationsSumExpensesQB = $operationRepository->getOperationsSumExpensesQB($this->getUser());
+        $operationsSumIncomesQB = $operationRepository->getOperationsSumIncomesQB($this->getUser());
+
+        $operationsSumGroupByContactExpensesQB = $operationRepository->getOperationsSumGroupByContactExpensesQB($this->getUser());
+        $operationsSumGroupByContactIncomesQB = $operationRepository->getOperationsSumGroupByContactIncomesQB($this->getUser());
+        $operationsSumGroupByTagExpensesQB = $operationRepository->getOperationsSumGroupByTagExpensesQB($this->getUser());
+        $operationsSumGroupByTagIncomesQB = $operationRepository->getOperationsSumGroupByTagIncomesQB($this->getUser());
+
+        if ($filter->isValid())
+        {
+            $dateFrom = $filter->get('date')->get('left_date')->getData();
+            $dateTo = $filter->get('date')->get('right_date')->getData();
+            $group = $filter->get('group')->getData();
+
+            $qbUpdater = $this->get('lexik_form_filter.query_builder_updater');
+            $qbUpdater->addFilterConditions($filter, $operationsSumStartQB);
+            $qbUpdater->addFilterConditions($filter, $operationsSumQB);
+            $qbUpdater->addFilterConditions($filter, $operationsSumExpensesQB);
+            $qbUpdater->addFilterConditions($filter, $operationsSumIncomesQB);
+
+            $qbUpdater->addFilterConditions($filter, $operationsSumGroupByContactExpensesQB);
+            $qbUpdater->addFilterConditions($filter, $operationsSumGroupByContactIncomesQB);
+            $qbUpdater->addFilterConditions($filter, $operationsSumGroupByTagExpensesQB);
+            $qbUpdater->addFilterConditions($filter, $operationsSumGroupByTagIncomesQB);
         }
-
-        if (null === $dateTo) {
-            $dateTo = clone $dateFrom;
-            $dateTo->add(new DateInterval('P1M'));
-        }
-
-        $datePrevFrom = clone $dateFrom;
-        $datePrevTo = clone $dateTo;
-        $dateNextFrom = clone $dateFrom;
-        $dateNextTo = clone $dateTo;
-
-        $interval = date_diff($dateFrom, $dateTo);
-        $dates = [
-            'prevFrom' => $datePrevFrom->sub($interval),
-            'prevTo' => $datePrevTo->sub($interval),
-            'nextFrom' => $dateNextFrom->add($interval),
-            'nextTo' => $dateNextTo->add($interval),
-        ];
 
         $statistics = [
-            'start' => $operationRepository->getOperationsSumQB($this->getUser(), null, $dateFrom)->execute()->fetchColumn(),
-            'balance' => $operationRepository->getOperationsSumQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchColumn(),
-            'expenses' => $operationRepository->getOperationsSumExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetch(),
-            'incomes' => $operationRepository->getOperationsSumIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetch(),
+            'start' => $operationsSumQB->execute()->fetchColumn(),
+            'balance' => $operationsSumQB->execute()->fetchColumn(),
+            'expenses' => $operationsSumExpensesQB->execute()->fetch(),
+            'incomes' => $operationsSumIncomesQB->execute()->fetch(),
         ];
 
         $operations = [
             'contact' => [
-                'expenses' => $operationRepository->getOperationsSumGroupByContactExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
-                'incomes' => $operationRepository->getOperationsSumGroupByContactIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+                'expenses' => $operationsSumGroupByContactExpensesQB->execute()->fetchAll(),
+                'incomes' => $operationsSumGroupByContactIncomesQB->execute()->fetchAll(),
             ],
             'tag' => [
-                'expenses' => $operationRepository->getOperationsSumGroupByTagExpensesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
-                'incomes' => $operationRepository->getOperationsSumGroupByTagIncomesQB($this->getUser(), $dateFrom, $dateTo)->execute()->fetchAll(),
+                'expenses' => $operationsSumGroupByTagExpensesQB->execute()->fetchAll(),
+                'incomes' => $operationsSumGroupByTagIncomesQB->execute()->fetchAll(),
             ],
         ];
 
-        $timeLine = $operationRepository->getOperationsTimeLineGroupByDateQB($this->getUser(), $dateFrom, $dateTo, $group);
+        $timeLine = $operationRepository->getOperationsTimeLineGroupByDateQB($this->getUser(), $group);
 
         return [
+            'filter' => $filter->createView(),
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
-            'dates' => $dates,
-            'group' => $group,
             'statistics' => $statistics,
             'operations' => $operations,
             'timeLine' => $timeLine,

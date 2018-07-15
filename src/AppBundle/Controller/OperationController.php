@@ -5,10 +5,13 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Contact;
 use AppBundle\Entity\Operation;
 use AppBundle\Entity\Tag;
+use AppBundle\Filter\OperationFilterType;
 use AppBundle\Form\OperationType;
 use AppBundle\Repository\OperationRepository;
 use DateTime;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
+use Lexik\Bundle\FormFilterBundle\Event\GetFilterConditionEvent;
+use Lexik\Bundle\FormFilterBundle\Filter\Query\QueryInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -31,44 +34,39 @@ class OperationController extends Controller
      * @Method("GET")
      * @Template()
      *
-     * @QueryParam(name="dateFrom", nullable=true)
-     * @QueryParam(name="dateTo", nullable=true)
-     * @QueryParam(name="contact", nullable=true, requirements="\d+")
-     * @QueryParam(name="tag", nullable=true, requirements="\d+")
-     * @QueryParam(name="group", nullable=true, default="daily", requirements="daily|weekly|monthly|yearly")
-     *
-     * @param DateTime     $dateFrom
-     * @param DateTime     $dateTo
-     * @param Contact|null $contact
-     * @param Tag|null     $tag
-     * @param string       $group
+     * @param Request $request
+     * @param string $group
      *
      * @return array
      */
-    public function indexAction(DateTime $dateFrom = null, DateTime $dateTo = null, Contact $contact = null, Tag $tag = null, $group = OperationRepository::GROUP_DAILY)
+    public function indexAction(Request $request, $group = OperationRepository::GROUP_DAILY)
     {
-        $em = $this->getDoctrine()->getManager();
-        $operationRepository = $em->getRepository(Operation::class);
+        $filter = $this->get('form.factory')->create(OperationFilterType::class);
+        $filter->handleRequest($request);
 
-        $operations = $operationRepository
-            ->getOperationsByContactTagQB($this->getUser(), $dateFrom, $dateTo, $contact, $tag)
+        $operationRepository = $this->getDoctrine()->getManager()->getRepository(Operation::class);
+
+        $operationsQB = $operationRepository
+            ->getOperationsQB($this->getUser())
             ->orderBy('operation.date', 'DESC')
-            ->addOrderBy('tag.name')
-            ->getQuery()
-            ->getResult();
+            ->groupBy('operation.id', 'contact.id');
+        ;
 
-        $statistics = $operationRepository->getOperationsSumQB($this->getUser(), $dateFrom, $dateTo, $contact, $tag)->execute()->fetch();
+        $statisticsQB = $operationRepository->getOperationsSumQB($this->getUser());
 
-        $timeLine = $operationRepository->getOperationsTimeLineGroupByContactQB($this->getUser(), $dateFrom, $dateTo, $contact, $group);
+        if($filter->isValid()){
+            $qbUpdater = $this->get('lexik_form_filter.query_builder_updater');
+            $qbUpdater->addFilterConditions($filter, $operationsQB);
+            $qbUpdater->addFilterConditions($filter, $statisticsQB);
+            $group = $filter->get('group')->getData();
+        }
+
+        $timeLine = $operationRepository->getOperationsTimeLineGroupByContactQB($this->getUser(), $group);
 
         return [
-            'dateFrom' => $dateFrom,
-            'dateTo' => $dateTo,
-            'contact' => $contact,
-            'tag' => $tag,
-            'group' => $group,
-            'operations' => $operations,
-            'statistics' => $statistics,
+            'filter' => $filter->createView(),
+            'operations' => $operationsQB->execute()->fetchAll(),
+            'statistics' => $statisticsQB->execute()->fetch(),
             'timeLine' => $timeLine,
         ];
     }

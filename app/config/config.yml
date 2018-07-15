@@ -83,3 +83,12 @@ fos_user:
 # FOS Rest Configuration
 fos_rest:
     param_fetcher_listener: force
+
+# Lexik Form Filter
+lexik_form_filter:
+    condition_pattern: text.contains
+    force_case_insensitivity: false
+    listeners:
+        doctrine_orm: true
+        doctrine_dbal: true
+        doctrine_mongodb: false

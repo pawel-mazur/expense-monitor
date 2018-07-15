@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Contact;
+use AppBundle\Filter\ContactFilterType;
 use AppBundle\Form\ContactType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -24,19 +25,27 @@ class ContactController extends Controller
      * @Method("GET")
      * @Template()
      *
+     * @param Request $request
+     *
      * @return array
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $repository = $em->getRepository(Contact::class);
 
-        $contacts = $repository->getContactsWihOperationsQB($this->getUser())
-            ->getQuery()
-            ->getResult();
+        $contactsQB = $repository->getContactsWihOperationsQB($this->getUser());
+
+        $filter = $this->get('form.factory')->create(ContactFilterType::class);
+        $filter->handleRequest($request);
+
+        if($filter->isValid()){
+            $this->get('lexik_form_filter.query_builder_updater')->addFilterConditions($filter, $contactsQB);
+        }
 
         return [
-            'contacts' => $contacts,
+            'filter' => $filter->createView(),
+            'contacts' => $contactsQB->getQuery()->getResult(),
         ];
     }
 

@@ -8,10 +8,9 @@
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap/dist/css/bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap/dist/css/bootstrap-theme.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css') }}">
-        <link rel="stylesheet" href="{{ asset('vendor/datatables.net-bs/css/dataTables.bootstrap.css') }}">
-        <link rel="stylesheet" href="{{ asset('vendor/datatables.net-responsive-bs/css/responsive.bootstrap.min.css') }}">
-        <link rel="stylesheet" href="{{ asset('vendor/datatables.net-rowgroup-bs/css/rowGroup.bootstrap.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/morris.js/morris.css') }}">
+        <link rel="stylesheet" href="{{ asset('vendor/select2/dist/css/select2.min.css') }}" />
+        <link rel="stylesheet" href="{{ asset('vendor/select2-bootstrap-theme/dist/select2-bootstrap.min.css') }}" />
         <style>
             body {
                 padding-top: 20px;
@@ -104,26 +103,19 @@
 
         <script src="{{ asset('vendor/jquery/dist/jquery.min.js') }}"></script>
         <script src="{{ asset('vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
-        <script src="{{ asset('vendor/datatables.net/js/jquery.dataTables.min.js') }}"></script>
-        <script src="{{ asset('vendor/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"></script>
-        <script src="{{ asset('vendor/datatables.net-responsive-bs/js/responsive.bootstrap.min.js') }}"></script>
-        <script src="{{ asset('vendor/datatables.net-rowgroup/js/dataTables.rowGroup.min.js') }}"></script>
         <script src="{{ asset('vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
         <script src="{{ asset('vendor/bootstrap-datepicker/dist/locales/bootstrap-datepicker.pl.min.js') }}"></script>
         <script src="{{ asset('vendor/raphael/raphael.min.js') }}"></script>
         <script src="{{ asset('vendor/morris.js/morris.min.js') }}"></script>
+        <script src="{{ asset('vendor/select2/dist/js/select2.min.js') }}"></script>
         {% block javascripts %}
         <script>
-
             $(document).ready( function () {
                 $('.datepicker').datepicker();
-                $('.table').DataTable({
-                    language: {
-                        url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Polish.json"
-                    }
+                $('select').select2({
+                    theme: "bootstrap"
                 });
             } );
-
         </script>
         {% endblock %}
 

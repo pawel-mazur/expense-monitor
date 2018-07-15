@@ -21,6 +21,14 @@ flash:
     success: 'Pomyślnie zaimportowano operacje'
     error: 'Podczas importowania operacji wystąpił błąd'
 
+filter:
+  date_from: 'Data od'
+  date_to: 'Data do'
+  amount_from: 'Kwota od'
+  amount_to: 'Kwota do'
+  submit: 'Filtruj'
+  reset: 'Wyczyść'
+
 form:
   file:
     label: 'Plik'

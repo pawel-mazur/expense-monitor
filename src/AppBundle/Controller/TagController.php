@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Tag;
+use AppBundle\Filter\TagFilterType;
 use AppBundle\Form\TagType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -23,18 +24,27 @@ class TagController extends Controller
      * @Route("", name="tag_index")
      * @Method("GET")
      * @Template()
+     *
+     * @param Request $request
+     * @return array
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $repository = $em->getRepository(Tag::class);
 
-        $tags = $repository->createQB($this->getUser())
-            ->getQuery()
-            ->getResult();
+        $tagsQB = $repository->createQB($this->getUser());
+
+        $filter = $this->get('form.factory')->create(TagFilterType::class);
+        $filter->handleRequest($request);
+
+        if($filter->isValid()){
+            $this->get('lexik_form_filter.query_builder_updater')->addFilterConditions($filter, $tagsQB);
+        }
 
         return [
-            'tags' => $tags,
+            'filter' => $filter->createView(),
+            'tags' => $tagsQB->getQuery()->getResult(),
         ];
     }
 

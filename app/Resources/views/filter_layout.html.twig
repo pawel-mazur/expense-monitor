@@ -1,0 +1,72 @@
+{% use "bootstrap_3_layout.html.twig" %}
+
+{% block form %}
+
+    {{ form_start(form) }}
+
+    <div class="panel panel-default">
+
+        <div class="panel-heading">
+            <h3 class="panel-title">Filtry</h3>
+        </div>
+
+        <div class="panel-body">
+            {{ form_widget(form) }}
+        </div>
+
+        <div class="panel-footer">
+
+            <input type="submit" class="btn-default btn" value="{{ 'filter.submit' | trans }}" />
+            <a href="?" class="btn btn-default">{{ 'filter.reset' | trans }}</a>
+
+        </div>
+
+    </div>
+
+    {{ form_end(form) }}
+
+{% endblock %}
+
+{% block form_row %}
+
+    <div class="col-md-4">
+        {{ parent() }}
+    </div>
+
+{% endblock %}
+
+{% block filter_date_range_row %}
+
+    {% form_theme form "bootstrap_3_layout.html.twig" %}
+
+    <div class="col-md-2">
+        <div class="form-group">
+            {{ form_row(form.left_date) }}
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="form-group">
+            {{ form_row(form.right_date) }}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block filter_number_range_row %}
+
+    {% form_theme form "bootstrap_3_layout.html.twig" %}
+
+    <div class="col-md-2">
+        <div class="form-group">
+            {{ form_row(form.left_number) }}
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <div class="form-group">
+            {{ form_row(form.right_number) }}
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% form_theme filter 'filter_layout.html.twig' %}
+
 {% block body %}
 
     <div class="row">
@@ -70,21 +72,12 @@
 
     </div>
 
+    {{ form(filter) }}
+
     <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">
-                <i class="glyphicon glyphicon-tasks"></i>
-                {{ 'header.summary' | trans }}
-                <div class="pull-right">
-                    <label for="group">{{ 'group._title'| trans }}</label>
-                    <select id="group">
-                        <option value=""></option>
-                        <option value="daily" data-href="{{ path(app.request.get('_route'), app.request.query.all|merge({'group': 'daily'})) }}">{{ 'group.daily' | trans }}</option>
-                        <option value="weekly" data-href="{{ path(app.request.get('_route'), app.request.query.all|merge({'group': 'weekly'})) }}">{{ 'group.weekly' | trans }}</option>
-                        <option value="monthly" data-href="{{ path(app.request.get('_route'), app.request.query.all|merge({'group': 'monthly'})) }}">{{ 'group.monthly' | trans }}</option>
-                        <option value="yearly" data-href="{{ path(app.request.get('_route'), app.request.query.all|merge({'group': 'yearly'})) }}">{{ 'group.yearly' | trans }}</option>
-                    </select>
-                </div>
+                <i class="glyphicon glyphicon-tasks"></i> {{ 'header.summary' | trans }}
             </h3>
         </div>
         <div class="panel-body text-center">
@@ -101,7 +94,6 @@
             <thead>
                 <tr class="active">
                     <th>{{ 'model._common.date' | trans }}</th>
-                    <th>{{ 'model.operation._title' | trans }}</th>
                     <th>{{ 'model.contact._title' | trans }}</th>
                     <th>{{ 'model.tag._title_plural' | trans }}</th>
                     <th>{{ 'model.operation.amount' | trans }}</th>
@@ -110,17 +102,24 @@
             <tbody>
             {% set date = null %}
             {% for operation in operations %}
+
+                {% if date is null or date != operation.date %}
+                    {% set date = operation.date %}
+                    <tr class="active">
+                        <th colspan="4">{{ operation.date | date('d.m.Y') }}</th>
+                    </tr>
+                {% endif %}
                 <tr>
-                    <td>{{ operation.date | date('Y-m-d') }}</td>
                     <td><a href="{{ path('operation_edit', {'operation': operation.id }) }}" class="center-block">{{ operation.name }}</a></td>
-                    <td><a href="{{ path('operation_index', {contact: operation.contact.id}) }}">{{ operation.contact.name }}</a></td>
+                    <td><a href="{{ path('operation_index', {contact: operation.contact_id}) }}">{{ operation.contact_name }}</a></td>
                     <td>
-                        {% for tag in operation.contact.tags %}
-                            <a href="{{ path('operation_index', {tag: tag.id}) }}">{{ tag.name }}</a>{% if not loop.last %}, {% endif %}
-                        {% endfor %}
+                        {#{% for tag in operation.contact.tags %}#}
+                            {#<a href="{{ path('operation_index', {tag: tag.id}) }}">{{ tag.name }}</a>{% if not loop.last %}, {% endif %}#}
+                        {#{% endfor %}#}
                     </td>
                     <td class="text-right">{{ operation.amount | number_format(2, '.', ',') }} zł</td>
                 </tr>
+
             {% endfor %}
             </tbody>
         </table>
@@ -134,22 +133,8 @@
     <script>
 
         $(document).ready( function () {
-            $('.table').DataTable({
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Polish.json"
-                },
-                rowGroup: {
-                    dataSrc: 0
-                }
-            });
-
-            {% if group is defined %}
-            $('#group').val("{{ group }}");
-            {% endif %}
-
-            $('#group').change(function() {
-                window.location.replace($("option:selected", this).attr('data-href'));
-            })
+            $('select').select2({theme: "bootstrap"});
+            $('.datepicker').datepicker({language:'pl'});
         });
 
         new Morris.Line({
